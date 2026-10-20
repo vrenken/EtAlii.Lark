@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Restore
+        run: dotnet restore EtAlii.Lark.sln
+
+      - name: Build
+        run: dotnet build EtAlii.Lark.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test EtAlii.Lark.sln --configuration Release --no-build --logger "trx;LogFileName=results.trx"
+
+      - name: Pack
+        run: dotnet pack src/EtAlii.Lark/EtAlii.Lark.csproj --configuration Release --no-build --output artifacts
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nuget
+          path: artifacts/*.nupkg

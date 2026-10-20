@@ -43,7 +43,7 @@ public sealed class LarkBuilder
         return this;
     }
 
-    /// <summary>Only builds a lexer (see <see cref="Lark.Lex"/>).</summary>
+    /// <summary>Only builds a lexer (see <see cref="Lark.Lex(TextSlice, bool)"/>).</summary>
     public LarkBuilder LexerOnly()
     {
         Options.Parser = ParserKind.None;
