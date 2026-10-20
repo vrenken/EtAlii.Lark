@@ -161,6 +161,171 @@ public class GeneratorDiagnosticsTests
         Assert.Empty(errors);
     }
 
+    private const string OrderGrammar = """
+        start: item+
+        item: NAME AMOUNT          -> priced
+            | NAME                 -> free
+            | NAME "x" COUNT       -> counted
+        ?amount: AMOUNT | COUNT
+        total: "total" amount
+        %import common.CNAME -> NAME
+        %import common.NUMBER -> AMOUNT
+        %import common.INT -> COUNT
+        %import common.WS
+        %ignore WS
+        """;
+
+    private static (ImmutableArray<Diagnostic> GeneratorDiagnostics, ImmutableArray<Diagnostic> CompilationDiagnostics, string[] Sources) RunTyped(string attributes, string members = "") =>
+        Run($$""""
+            using EtAlii.Lark;
+            namespace Demo;
+            public record Item;
+            public record Priced : Item;
+            public record Free : Item;
+            public class Unrelated;
+            [LarkGrammar(Grammar = """
+            {{OrderGrammar}}
+            """)]
+            {{attributes}}
+            public partial class P { {{members}} }
+            """");
+
+    [Fact]
+    public void LarkResult_GeneratesTypedVisitor()
+    {
+        var (diagnostics, errors, sources) = RunTyped("""
+            [LarkResult(typeof(Priced), "priced")]
+            [LarkResult(typeof(Free), "free")]
+            [LarkResult(typeof(decimal), "AMOUNT")]
+            """);
+
+        // The children of start are priced, free or counted trees, and of amount AMOUNT or COUNT tokens: no common type.
+        Assert.Equal(new[] { "LARK007", "LARK007" }, diagnostics.Select(d => d.Id));
+        Assert.Contains("[LarkResult(typeof(...), \"item\")]", diagnostics[0].GetMessage());
+        Assert.Empty(errors);
+        var source = Assert.Single(sources);
+        Assert.Contains("public abstract partial class Visitor\n", source);
+        Assert.Contains("protected abstract global::Demo.Priced VisitPriced(PricedNode node, global::EtAlii.Lark.Token name, decimal amount);", source);
+        Assert.Contains("protected virtual CountedNode VisitCounted(CountedNode node, global::EtAlii.Lark.Token name, global::EtAlii.Lark.Token count) => node;", source);
+        Assert.Contains("protected abstract decimal VisitAmountToken(global::EtAlii.Lark.Token token);", source);
+        Assert.Contains("VisitStart(StartNode node, global::System.Collections.Generic.IReadOnlyList<object> item)", source);
+    }
+
+    [Fact]
+    public void LarkResult_InfersCommonBaseTypes()
+    {
+        var (diagnostics, errors, sources) = RunTyped("""
+            [LarkResult(typeof(Priced), "priced")]
+            [LarkResult(typeof(Free), "free", "counted")]
+            """);
+
+        Assert.Empty(diagnostics);
+        Assert.Empty(errors);
+        Assert.Contains("VisitStart(StartNode node, global::System.Collections.Generic.IReadOnlyList<global::Demo.Item> item)", Assert.Single(sources));
+    }
+
+    [Fact]
+    public void LarkResult_InlinedRuleSetsTheTypeOfItsChildren()
+    {
+        var (diagnostics, errors, sources) = RunTyped("""
+            [LarkResult(typeof(decimal), "amount", "AMOUNT")]
+            [LarkResult(typeof(int), "COUNT")]
+            """);
+
+        // COUNT is an int, which doesn't convert to the decimal of the amount rule.
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal("LARK008", diagnostic.Id);
+        Assert.Contains("'COUNT'", diagnostic.GetMessage());
+        Assert.Contains("VisitTotal(TotalNode node, decimal amount)", Assert.Single(sources));
+    }
+
+    [Fact]
+    public void LarkResult_UnknownName_ReportsLark005()
+    {
+        var (diagnostics, errors, _) = RunTyped("""[LarkResult(typeof(Priced), "priced", "nonsense")]""");
+
+        var diagnostic = Assert.Single(diagnostics, d => d.Severity == DiagnosticSeverity.Error);
+        Assert.Equal("LARK005", diagnostic.Id);
+        Assert.Contains("'nonsense'", diagnostic.GetMessage());
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public void LarkResult_DuplicateName_ReportsLark006()
+    {
+        var (diagnostics, _, _) = RunTyped("""
+            [LarkResult(typeof(Priced), "priced")]
+            [LarkResult(typeof(Free), "priced")]
+            """);
+
+        Assert.Equal("LARK006", Assert.Single(diagnostics, d => d.Severity == DiagnosticSeverity.Error).Id);
+    }
+
+    [Fact]
+    public void LarkResult_NoCommonType_ReportsLark007()
+    {
+        var (diagnostics, errors, sources) = RunTyped("""
+            [LarkResult(typeof(Priced), "priced")]
+            [LarkResult(typeof(Unrelated), "free", "counted")]
+            """);
+
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal("LARK007", diagnostic.Id);
+        Assert.Equal(DiagnosticSeverity.Warning, diagnostic.Severity);
+        Assert.Empty(errors);
+        Assert.Contains("IReadOnlyList<object> item", Assert.Single(sources));
+    }
+
+    [Fact]
+    public void LarkResult_NodeWithoutFixedShape_ReportsLark009()
+    {
+        var (diagnostics, errors, sources) = Run(""""
+            using EtAlii.Lark;
+            [LarkGrammar(Grammar = """
+                start: value
+                value: A B | A
+                A: "a"
+                B: "b"
+                """)]
+            [LarkResult(typeof(string), "value")]
+            public partial class P { }
+            """");
+
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal("LARK009", diagnostic.Id);
+        Assert.Equal(DiagnosticSeverity.Info, diagnostic.Severity);
+        Assert.Empty(errors);
+        Assert.Contains("protected abstract string VisitValue(ValueNode node, global::System.Collections.Generic.IReadOnlyList<object?> children);", Assert.Single(sources));
+    }
+
+    [Fact]
+    public void WithoutLarkResult_NoTypedVisitorIsGenerated()
+    {
+        var (_, _, sources) = RunTyped("");
+
+        Assert.DoesNotContain("public abstract partial class Visitor\n", Assert.Single(sources));
+    }
+
+    [Fact]
+    public void LarkResult_GeneratesCompilingVisitorsForAllGrammarsOfTheRepository()
+    {
+        foreach (var file in GrammarFiles())
+        {
+            var text = File.ReadAllText(file);
+            var model = GrammarAnalyzer.Analyze(text, keepAllTokens: false);
+            var node = model.Nodes.FirstOrDefault(n => !model.NeverTrees.Contains(n.Name));
+            if (node is null) continue;
+            var (_, errors, _) = Run($$"""
+                using EtAlii.Lark;
+                [LarkGrammar("grammar.lark")]
+                [LarkResult(typeof(object), {{LarkGrammarGenerator.Literal(node.Name)}})]
+                public partial class P { }
+                """, ("/project/grammar.lark", text));
+
+            Assert.True(errors.IsEmpty, $"{file}: {string.Join("; ", errors.Take(3))}");
+        }
+    }
+
     private static IEnumerable<string> GrammarFiles()
     {
         var root = AppContext.BaseDirectory;

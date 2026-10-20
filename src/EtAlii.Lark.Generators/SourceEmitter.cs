@@ -5,7 +5,7 @@ using System.Text;
 namespace EtAlii.Lark.Generators
 {
     /// <summary>Writes the generated parser for a grammar class.</summary>
-    internal sealed class SourceEmitter
+    internal sealed partial class SourceEmitter
     {
         private const string L = "global::EtAlii.Lark.";
 
@@ -18,7 +18,7 @@ namespace EtAlii.Lark.Generators
         private readonly string _grammar;
         private readonly GrammarModel? _grammarModel;
         private readonly Dictionary<string, string> _nodeBaseNames = new();
-    private readonly Dictionary<string, string> _nodeTypeNames = new();
+        private readonly Dictionary<string, string> _nodeTypeNames = new();
         private readonly StringBuilder _sb = new();
         private int _indent;
 
@@ -77,6 +77,7 @@ namespace EtAlii.Lark.Generators
                 EmitNames();
                 foreach (var node in _grammarModel.Nodes) EmitNode(node);
                 EmitVisitor();
+                if (_model.Results.Count > 0) EmitTypedVisitor();
             }
             Close();
 

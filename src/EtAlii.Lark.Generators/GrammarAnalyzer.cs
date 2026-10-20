@@ -28,10 +28,35 @@ namespace EtAlii.Lark.Generators
         Complex,
     }
 
-    /// <summary>One item of an alternative. Complex items (groups, operators, ranges, templates) have no fixed shape.</summary>
+    /// <summary>
+    /// One item of an alternative. Complex items (groups, operators, ranges, templates) have no fixed shape as node
+    /// properties; their <see cref="Expression"/> describes their structure for the typed visitor.
+    /// </summary>
     internal sealed class GrammarItem
     {
-        public GrammarItem(ItemKind kind, string name = "")
+        public GrammarItem(ItemKind kind, string name = "", GrammarExpression? expression = null)
+        {
+            Kind = kind;
+            Name = name;
+            Expression = expression ?? new SymbolExpression(kind, name);
+        }
+
+        public ItemKind Kind { get; }
+
+        public string Name { get; }
+
+        public GrammarExpression Expression { get; }
+    }
+
+    /// <summary>The structure of an item of an alternative.</summary>
+    internal abstract class GrammarExpression
+    {
+    }
+
+    /// <summary>A rule, terminal, string or regular expression.</summary>
+    internal sealed class SymbolExpression : GrammarExpression
+    {
+        public SymbolExpression(ItemKind kind, string name)
         {
             Kind = kind;
             Name = name;
@@ -40,6 +65,42 @@ namespace EtAlii.Lark.Generators
         public ItemKind Kind { get; }
 
         public string Name { get; }
+    }
+
+    /// <summary>A group <c>( a | b )</c>, or an optional group <c>[ a | b ]</c>.</summary>
+    internal sealed class GroupExpression : GrammarExpression
+    {
+        public GroupExpression(List<Alternative> alternatives, bool isMaybe)
+        {
+            Alternatives = alternatives;
+            IsMaybe = isMaybe;
+        }
+
+        public List<Alternative> Alternatives { get; }
+
+        /// <summary>True for <c>[ ... ]</c>, which produces placeholders when <c>maybe_placeholders</c> is set.</summary>
+        public bool IsMaybe { get; }
+    }
+
+    /// <summary>An expression with an operator: <c>?</c>, <c>*</c>, <c>+</c> or a <c>~</c> range.</summary>
+    internal sealed class OperatorExpression : GrammarExpression
+    {
+        public OperatorExpression(GrammarExpression operand, string op)
+        {
+            Operand = operand;
+            Operator = op;
+        }
+
+        public GrammarExpression Operand { get; }
+
+        /// <summary><c>?</c>, <c>*</c>, <c>+</c> or <c>~</c>.</summary>
+        public string Operator { get; }
+    }
+
+    /// <summary>An expression whose trees the generator doesn't model, such as a template or a string range.</summary>
+    internal sealed class UnsupportedExpression : GrammarExpression
+    {
+        public static readonly UnsupportedExpression Instance = new();
     }
 
     internal sealed class Alternative
@@ -127,6 +188,18 @@ namespace EtAlii.Lark.Generators
 
         public List<NodeModel> Nodes { get; } = new();
 
+        /// <summary>The children of each node as the typed visitor sees them; null for nodes without a fixed shape.</summary>
+        public Dictionary<string, List<ShapeElement>?> TypedShapes { get; } = new();
+
+        /// <summary>What each rule can be as the child of a tree.</summary>
+        public Dictionary<string, SortedSet<ShapeMember>> RuleMembers { get; } = new();
+
+        /// <summary>The <c>?rule</c> rules whose alternatives all have one child, so that they never create trees of their own.</summary>
+        public HashSet<string> NeverTrees { get; } = new();
+
+        /// <summary>The <c>?rule</c> and <c>_rule</c> rules, whose trees are inlined into their parents.</summary>
+        public HashSet<string> InlinedRules { get; } = new();
+
         public NodeModel? FindNode(string name) => Nodes.FirstOrDefault(n => n.Name == name);
     }
 
@@ -136,14 +209,14 @@ namespace EtAlii.Lark.Generators
     /// </summary>
     internal static class GrammarAnalyzer
     {
-        public static GrammarModel Analyze(string grammar, bool keepAllTokens)
+        public static GrammarModel Analyze(string grammar, bool keepAllTokens, bool maybePlaceholders = true)
         {
             var tokens = new Tokenizer(grammar).Tokenize();
             var definitions = new Parser(tokens).Parse();
-            return BuildModel(definitions, keepAllTokens);
+            return BuildModel(definitions, keepAllTokens, maybePlaceholders);
         }
 
-        private static GrammarModel BuildModel(Definitions definitions, bool keepAllTokens)
+        private static GrammarModel BuildModel(Definitions definitions, bool keepAllTokens, bool maybePlaceholders)
         {
             var model = new GrammarModel();
             var rules = definitions.Rules;
@@ -189,6 +262,21 @@ namespace EtAlii.Lark.Generators
                     shape = ShapeOf(pair.Value[0].Rule, alternative, rules, keepAllTokens);
                 }
                 model.Nodes.Add(new NodeModel(name, shape, isSolid));
+            }
+
+            foreach (var rule in rules.Values)
+            {
+                if (rule.Expand1 || rule.Name.StartsWith("_", StringComparison.Ordinal)) model.InlinedRules.Add(rule.Name);
+            }
+            var shapes = new ShapeAnalyzer(rules, keepAllTokens, maybePlaceholders);
+            foreach (var rule in rules.Keys)
+            {
+                model.RuleMembers[rule] = shapes.MembersOf(rule);
+            }
+            foreach (var pair in sources)
+            {
+                model.TypedShapes[pair.Key] = shapes.ShapeOf(pair.Key, pair.Value, out var neverTree);
+                if (neverTree) model.NeverTrees.Add(pair.Key);
             }
 
             return model;
@@ -713,12 +801,13 @@ namespace EtAlii.Lark.Generators
                 var atom = TryParseAtom();
                 if (atom is null) return null;
 
-                if (Accept(T.Op)) return new GrammarItem(ItemKind.Complex);
+                if (Accept(T.Op)) return new GrammarItem(ItemKind.Complex, expression: new OperatorExpression(atom.Expression, _tokens[_pos - 1].Value));
                 if (Accept(T.Tilde))
                 {
-                    Expect(T.Number);
-                    if (Accept(T.DotDot)) Expect(T.Number);
-                    return new GrammarItem(ItemKind.Complex);
+                    var min = Expect(T.Number).Value;
+                    var max = Accept(T.DotDot) ? Expect(T.Number).Value : min;
+                    // A range that may be empty can be absent, like '*'.
+                    return new GrammarItem(ItemKind.Complex, expression: new OperatorExpression(atom.Expression, min == "0" ? "*" : max == "1" && min == "1" ? "1" : "+"));
                 }
                 return atom;
             }
@@ -728,21 +817,26 @@ namespace EtAlii.Lark.Generators
                 switch (Current.Type)
                 {
                     case T.LPar:
+                    {
                         Next();
-                        ParseExpansions();
+                        var alternatives = ParseExpansions();
                         Expect(T.RPar);
-                        return new GrammarItem(ItemKind.Complex);
+                        return new GrammarItem(ItemKind.Complex, expression: new GroupExpression(alternatives, isMaybe: false));
+                    }
                     case T.LBra:
+                    {
                         Next();
-                        ParseExpansions();
+                        var alternatives = ParseExpansions();
                         Expect(T.RBra);
-                        return new GrammarItem(ItemKind.Complex);
+                        return new GrammarItem(ItemKind.Complex, expression: new GroupExpression(alternatives, isMaybe: true));
+                    }
                     case T.String:
                         Next();
                         if (Accept(T.DotDot))
                         {
                             Expect(T.String);
-                            return new GrammarItem(ItemKind.Complex);
+                            // A character range is a single anonymous string-like token.
+                            return new GrammarItem(ItemKind.Complex, expression: new SymbolExpression(ItemKind.String, ""));
                         }
                         return new GrammarItem(ItemKind.String);
                     case T.Regexp:
@@ -759,7 +853,7 @@ namespace EtAlii.Lark.Generators
                             }
                             while (Accept(T.Comma));
                             Expect(T.RBrace);
-                            return new GrammarItem(ItemKind.Complex);
+                            return new GrammarItem(ItemKind.Complex, expression: UnsupportedExpression.Instance);
                         }
                         return new GrammarItem(name.Type == T.Rule ? ItemKind.Rule : ItemKind.Terminal, name.Value);
                     default:
