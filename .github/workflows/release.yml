@@ -4,10 +4,17 @@ name: Release
 # Trigger it by pushing a version tag, for example:
 #   git tag v0.1.0 && git push origin v0.1.0
 # A tag with a suffix (v0.2.0-preview.1) produces a prerelease package.
+# It can also be started by hand (Actions > Release > Run workflow) with a version; the run then creates the
+# v<version> tag on the selected branch's commit when it creates the GitHub release.
 
 on:
   push:
     tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish, without the leading v (for example 0.1.0 or 0.2.0-preview.1)'
+        required: true
 
 permissions:
   contents: write   # create the GitHub release
@@ -30,13 +37,20 @@ jobs:
 
       - name: Determine version
         id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            version="${INPUT_VERSION#v}"
+          else
+            version="${GITHUB_REF_NAME#v}"
+          fi
           if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
-            echo "Tag '$GITHUB_REF_NAME' is not a valid version tag (expected vMAJOR.MINOR.PATCH[-suffix])." >&2
+            echo "'$version' is not a valid version (expected MAJOR.MINOR.PATCH[-suffix])." >&2
             exit 1
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
           if [[ "$version" == *-* ]]; then echo "prerelease=true" >> "$GITHUB_OUTPUT"; else echo "prerelease=false" >> "$GITHUB_OUTPUT"; fi
 
       - name: Restore
@@ -82,7 +96,14 @@ jobs:
       - name: Create GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
         run: |
+          # The release may already exist when it was drafted in the GitHub UI (which created the tag).
+          if gh release view "$TAG" > /dev/null 2>&1; then
+            gh release upload "$TAG" artifacts/*.nupkg artifacts/*.snupkg --clobber
+            exit 0
+          fi
           flags="--generate-notes"
           if [ "${{ steps.version.outputs.prerelease }}" = "true" ]; then flags="$flags --prerelease"; fi
-          gh release create "$GITHUB_REF_NAME" artifacts/*.nupkg artifacts/*.snupkg --title "$GITHUB_REF_NAME" $flags
+          # --target creates the tag on this commit when the run was started by hand.
+          gh release create "$TAG" artifacts/*.nupkg artifacts/*.snupkg --title "$TAG" --target "$GITHUB_SHA" $flags
