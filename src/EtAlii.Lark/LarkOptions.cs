@@ -75,6 +75,15 @@ public sealed class LarkOptions
     public string? SourcePath { get; set; }
 
     /// <summary>Returns a shallow copy of these options.</summary>
+    /// <summary>How many characters are read at a time when parsing a <see cref="TextReader"/> or <see cref="Stream"/>.</summary>
+    public int StreamChunkSize { get; set; } = 16 * 1024;
+
+    /// <summary>
+    /// How many characters past a match the streaming lexer reads before it accepts the token. Streaming gives the same
+    /// result as parsing the whole text, as long as no terminal needs to look further than this past a match to find a longer one.
+    /// </summary>
+    public int StreamLookahead { get; set; } = 4 * 1024;
+
     public LarkOptions Clone()
     {
         var copy = (LarkOptions)MemberwiseClone();

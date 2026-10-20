@@ -1,5 +1,6 @@
 namespace EtAlii.Lark;
 
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using EtAlii.Lark.Parsers;
@@ -175,6 +176,23 @@ public abstract class PostLex
 {
     public abstract IEnumerable<Token> Process(IEnumerable<Token> stream);
 
+    /// <summary>
+    /// Post-processes an asynchronous token stream. The default implementation collects the whole stream and then calls
+    /// <see cref="Process"/>; override it to process tokens as they arrive.
+    /// </summary>
+    public virtual async IAsyncEnumerable<Token> ProcessAsync(IAsyncEnumerable<Token> stream, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var tokens = new List<Token>();
+        await foreach (var token in stream.WithCancellation(cancellationToken).ConfigureAwait(false))
+        {
+            tokens.Add(token);
+        }
+        foreach (var token in Process(tokens))
+        {
+            yield return token;
+        }
+    }
+
     /// <summary>Terminals that the contextual lexer must always accept (because the post-lexer consumes them).</summary>
     public virtual IReadOnlyCollection<string> AlwaysAccept => Array.Empty<string>();
 }
@@ -345,6 +363,9 @@ public class BasicLexer : AbstractBasicLexer
 
     public override IReadOnlyDictionary<string, TerminalDef> TerminalsByName => _terminalsByName;
 
+    /// <summary>The terminal callbacks, including those that split embedded strings out of patterns.</summary>
+    internal IReadOnlyDictionary<string, Func<Token, Token>> Callbacks => _callback;
+
     internal static bool RegexpHasNewline(string r) =>
         r.Contains('\n') || r.Contains("\\n") || r.Contains("\\s") || r.Contains("[^") || (r.Contains("(?s") && r.Contains('.'));
 
@@ -497,6 +518,12 @@ public class ContextualLexer : Lexer
         rootConf.SkipValidation = true;
         _rootLexer = basicLexerFactory(rootConf);
     }
+
+    /// <summary>The lexer of each parser state.</summary>
+    internal IReadOnlyDictionary<int, AbstractBasicLexer> Lexers => _lexers;
+
+    /// <summary>A lexer for all terminals, used to report tokens that are defined but not expected.</summary>
+    internal AbstractBasicLexer RootLexer => _rootLexer;
 
     public override IEnumerable<Token> Lex(LexerState lexerState, object? parserState)
     {

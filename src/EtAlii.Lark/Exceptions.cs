@@ -75,7 +75,7 @@ public abstract class UnexpectedInputException : LarkException
     public int Column { get; protected set; }
 
     /// <summary>The index of the error in the input.</summary>
-    public int? PosInStream { get; protected set; }
+    public int? PosInStream { get; protected internal set; }
 
     /// <summary>A value representing the parser state. Do not rely on its value or type, only on its equality.</summary>
     public object? State { get; protected set; }

@@ -31,6 +31,7 @@ internal sealed class ParsingFrontend
             _ => throw new ConfigurationException($"Bad value for lexer: {lexerKind}"),
         };
 
+        RawLexer = Lexer;
         if (lexerConf.PostLex is not null)
         {
             Lexer = new PostLexConnector(Lexer, lexerConf.PostLex);
@@ -47,6 +48,9 @@ internal sealed class ParsingFrontend
     public object Parser { get; }
 
     public Lexer? Lexer { get; }
+
+    /// <summary>The lexer, without the post-lexer.</summary>
+    public Lexer? RawLexer { get; }
 
     public bool SkipLexer { get; }
 
@@ -145,6 +149,71 @@ internal sealed class ParsingFrontend
                 return cyk.Parse(MakeLexerThread(text), chosenStart);
             default:
                 throw new InvalidOperationException();
+        }
+    }
+
+    private StreamingLexer? CreateStreamingLexer() =>
+        SkipLexer ? null : StreamingLexer.TryCreate(RawLexer, Math.Max(1, Options?.StreamLookahead ?? 4096));
+
+    private StreamingTextBuffer CreateBuffer(TextReader reader) =>
+        new(reader, Math.Max(Options?.StreamChunkSize ?? 16384, 2 * (Options?.StreamLookahead ?? 4096)));
+
+    /// <summary>Parses the text of the reader. The basic and contextual lexers lex the text as it is read.</summary>
+    public object? ParseStream(TextReader reader, string? start = null)
+    {
+        var chosenStart = VerifyStart(start);
+        var streamingLexer = CreateStreamingLexer();
+        if (streamingLexer is null) return Parse(reader.ReadToEnd(), chosenStart);
+
+        var thread = new StreamingLexerThread(Lexer!, streamingLexer, CreateBuffer(reader), LexerConf.PostLex);
+        return Parser switch
+        {
+            LalrParser lalr => lalr.Parse(thread, chosenStart),
+            EarleyParser earley => earley.Parse(new Func<object?, IEnumerable<object>>(s => thread.Lex(s)), chosenStart),
+            CykFrontend cyk => cyk.Parse(thread, chosenStart),
+            _ => throw new InvalidOperationException(),
+        };
+    }
+
+    /// <summary>
+    /// Parses the text of the reader asynchronously. With LALR and the basic or contextual lexer, the text is parsed as it
+    /// is read; the other parsers read the whole text first.
+    /// </summary>
+    public async Task<object?> ParseStreamAsync(TextReader reader, string? start, CancellationToken cancellationToken)
+    {
+        var chosenStart = VerifyStart(start);
+        var streamingLexer = CreateStreamingLexer();
+        if (Parser is not LalrParser lalr || streamingLexer is null)
+        {
+            var text = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            return Parse(text, chosenStart);
+        }
+
+        var buffer = CreateBuffer(reader);
+        var thread = new StreamingLexerThread(Lexer!, streamingLexer, buffer, LexerConf.PostLex);
+        var core = lalr.Parser;
+        var state = new ParserState(new ParseConf(core.ParseTable, core.Callbacks, chosenStart), thread);
+
+        var tokens = streamingLexer.LexAsync(buffer, () => state, cancellationToken);
+        if (LexerConf.PostLex is not null) tokens = LexerConf.PostLex.ProcessAsync(tokens, cancellationToken);
+
+        try
+        {
+            Token? last = null;
+            await foreach (var token in tokens.WithCancellation(cancellationToken).ConfigureAwait(false))
+            {
+                last = token;
+                state.FeedToken(token);
+            }
+
+            var endToken = last is not null ? Token.NewBorrowPos("$END", "", last) : new Token("$END", "", 0, 1, 1);
+            return state.FeedToken(endToken, true);
+        }
+        catch (UnexpectedInputException e)
+        {
+            e.InteractiveParser = new InteractiveParser(core, state, thread);
+            throw;
         }
     }
 

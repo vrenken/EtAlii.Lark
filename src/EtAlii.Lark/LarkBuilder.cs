@@ -179,6 +179,16 @@ public sealed class LarkBuilder
         return this;
     }
 
+    /// <summary>Sets how many characters are read at a time, and looked ahead, when parsing a reader or stream.</summary>
+    public LarkBuilder WithStreaming(int chunkSize, int lookahead)
+    {
+        if (chunkSize <= 0) throw new ArgumentOutOfRangeException(nameof(chunkSize));
+        if (lookahead <= 0) throw new ArgumentOutOfRangeException(nameof(lookahead));
+        Options.StreamChunkSize = chunkSize;
+        Options.StreamLookahead = lookahead;
+        return this;
+    }
+
     /// <summary>Caches the grammar analysis (LALR only), optionally in the given file.</summary>
     public LarkBuilder WithCache(string? cachePath = null)
     {

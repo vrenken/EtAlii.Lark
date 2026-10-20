@@ -1,5 +1,7 @@
 namespace EtAlii.Lark;
 
+using System.Runtime.CompilerServices;
+
 /// <summary>
 /// A post-lexer that "injects" indent/dedent tokens based on indentation.
 /// </summary>
@@ -69,32 +71,30 @@ public abstract class Indenter : PostLex
         }
     }
 
-    private IEnumerable<Token> ProcessInternal(IEnumerable<Token> stream)
+    private IEnumerable<Token> ProcessToken(Token t)
     {
-        Token? token = null;
-        foreach (var t in stream)
+        if (t.Type == NlType)
         {
-            token = t;
-            if (t.Type == NlType)
-            {
-                foreach (var x in HandleNl(t)) yield return x;
-            }
-            else
-            {
-                yield return t;
-            }
-
-            if (OpenParenTypes.Contains(t.Type))
-            {
-                _parenLevel++;
-            }
-            else if (CloseParenTypes.Contains(t.Type))
-            {
-                _parenLevel--;
-                if (_parenLevel < 0) throw new InvalidOperationException("Unbalanced parentheses");
-            }
+            foreach (var x in HandleNl(t)) yield return x;
+        }
+        else
+        {
+            yield return t;
         }
 
+        if (OpenParenTypes.Contains(t.Type))
+        {
+            _parenLevel++;
+        }
+        else if (CloseParenTypes.Contains(t.Type))
+        {
+            _parenLevel--;
+            if (_parenLevel < 0) throw new InvalidOperationException("Unbalanced parentheses");
+        }
+    }
+
+    private IEnumerable<Token> Finish(Token? token)
+    {
         while (_indentLevel.Count > 1)
         {
             _indentLevel.RemoveAt(_indentLevel.Count - 1);
@@ -102,11 +102,42 @@ public abstract class Indenter : PostLex
         }
     }
 
-    public override IEnumerable<Token> Process(IEnumerable<Token> stream)
+    private void Reset()
     {
         _parenLevel = 0;
         _indentLevel = new List<int> { 0 };
+    }
+
+    private IEnumerable<Token> ProcessInternal(IEnumerable<Token> stream)
+    {
+        Token? token = null;
+        foreach (var t in stream)
+        {
+            token = t;
+            foreach (var x in ProcessToken(t)) yield return x;
+        }
+
+        foreach (var x in Finish(token)) yield return x;
+    }
+
+    public override IEnumerable<Token> Process(IEnumerable<Token> stream)
+    {
+        Reset();
         return ProcessInternal(stream);
+    }
+
+    /// <summary>Processes the tokens as they arrive.</summary>
+    public override async IAsyncEnumerable<Token> ProcessAsync(IAsyncEnumerable<Token> stream, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        Reset();
+        Token? token = null;
+        await foreach (var t in stream.WithCancellation(cancellationToken).ConfigureAwait(false))
+        {
+            token = t;
+            foreach (var x in ProcessToken(t)) yield return x;
+        }
+
+        foreach (var x in Finish(token)) yield return x;
     }
 
     public override IReadOnlyCollection<string> AlwaysAccept => new[] { NlType };
