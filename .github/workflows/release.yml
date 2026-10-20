@@ -73,21 +73,27 @@ jobs:
             artifacts/*.snupkg
 
       # Prefer nuget.org trusted publishing: it exchanges the GitHub OIDC token for a short-lived API key.
-      # Set the repository variable NUGET_USER to your nuget.org user name. If you'd rather use a long-lived
-      # API key, add it as the NUGET_API_KEY secret instead and this step is skipped.
+      # Set NUGET_USER (a repository variable or secret) to your nuget.org user name. If you'd rather use a
+      # long-lived API key, add it as the NUGET_API_KEY secret instead and the login is skipped.
+      - name: Check for trusted publishing
+        id: trusted
+        env:
+          NUGET_USER: ${{ vars.NUGET_USER || secrets.NUGET_USER }}
+        run: echo "enabled=$([ -n "$NUGET_USER" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
       - name: NuGet login (trusted publishing)
         id: login
-        if: ${{ vars.NUGET_USER != '' }}
+        if: ${{ steps.trusted.outputs.enabled == 'true' }}
         uses: NuGet/login@v1
         with:
-          user: ${{ vars.NUGET_USER }}
+          user: ${{ vars.NUGET_USER || secrets.NUGET_USER }}
 
       - name: Push to nuget.org
         env:
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY || secrets.NUGET_API_KEY }}
         run: |
           if [ -z "$NUGET_API_KEY" ]; then
-            echo "No nuget.org credentials: set the NUGET_USER variable (trusted publishing) or the NUGET_API_KEY secret." >&2
+            echo "No nuget.org credentials: set NUGET_USER (trusted publishing) or the NUGET_API_KEY secret." >&2
             exit 1
           fi
           # Pushing the .nupkg also pushes the matching .snupkg symbol package.
