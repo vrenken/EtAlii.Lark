@@ -179,7 +179,7 @@ git push origin v0.1.0
 ```
 
 A tag with a suffix, such as `v0.2.0-preview.1`, publishes a prerelease. The workflow authenticates with nuget.org
-trusted publishing when the `NUGET_USER` repository variable is set, or with the `NUGET_API_KEY` secret otherwise.
+trusted publishing when `NUGET_USER` is set (as a repository variable or secret), or with the `NUGET_API_KEY` secret otherwise.
 
 ## License
 
