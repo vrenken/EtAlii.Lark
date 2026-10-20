@@ -18,6 +18,7 @@ namespace EtAlii.Lark.Generators
     public sealed class LarkGrammarGenerator : IIncrementalGenerator
     {
         private const string AttributeName = "EtAlii.Lark.LarkGrammarAttribute";
+        private const string ResultAttributeName = "EtAlii.Lark.LarkResultAttribute";
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
@@ -54,6 +55,7 @@ namespace EtAlii.Lark.Generators
             var options = new List<OptionValue>();
             var start = new List<string>();
             var keepAllTokens = false;
+            var maybePlaceholders = true;
             foreach (var argument in attribute.NamedArguments)
             {
                 var value = argument.Value;
@@ -78,6 +80,7 @@ namespace EtAlii.Lark.Generators
                     case "Strict":
                         var flag = value.Value is true;
                         if (argument.Key == "KeepAllTokens") keepAllTokens = flag;
+                        if (argument.Key == "MaybePlaceholders") maybePlaceholders = flag;
                         options.Add(new OptionValue(argument.Key, flag ? "true" : "false"));
                         break;
                 }
@@ -95,7 +98,42 @@ namespace EtAlii.Lark.Generators
                 new EquatableArray<OptionValue>(options),
                 new EquatableArray<string>(start),
                 keepAllTokens,
+                maybePlaceholders,
+                new EquatableArray<ResultMapping>(ReadResults(symbol)),
                 LocationInfo.From(syntax.Identifier.GetLocation()));
+        }
+
+        private static IEnumerable<ResultMapping> ReadResults(INamedTypeSymbol symbol)
+        {
+            foreach (var attribute in symbol.GetAttributes())
+            {
+                if (attribute.AttributeClass?.ToDisplayString() != ResultAttributeName) continue;
+                if (attribute.ConstructorArguments.Length != 2 || attribute.ConstructorArguments[0].Value is not ITypeSymbol type || type.TypeKind == TypeKind.Error) continue;
+                var names = attribute.ConstructorArguments[1].Kind == TypedConstantKind.Array
+                    ? attribute.ConstructorArguments[1].Values.Select(v => v.Value as string).Where(v => v is not null).Select(v => v!)
+                    : Enumerable.Empty<string>();
+                var location = attribute.ApplicationSyntaxReference?.GetSyntax().GetLocation();
+                yield return new ResultMapping(ToResultType(type), new EquatableArray<string>(names), LocationInfo.From(location));
+            }
+        }
+
+        private static ResultType ToResultType(ITypeSymbol type)
+        {
+            static string Name(ITypeSymbol t) => t.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+
+            var baseTypes = new List<string>();
+            for (var t = type; t is not null && t.SpecialType != SpecialType.System_Object; t = t.BaseType)
+            {
+                if (t.SpecialType is SpecialType.System_ValueType or SpecialType.System_Enum) break;
+                baseTypes.Add(Name(t));
+            }
+            var links = type.AllInterfaces.SelectMany(i => i.AllInterfaces.Select(p => Name(i) + ">" + Name(p)));
+            return new ResultType(
+                Name(type),
+                type.IsValueType,
+                new EquatableArray<string>(baseTypes),
+                new EquatableArray<string>(type.AllInterfaces.Select(Name)),
+                new EquatableArray<string>(links));
         }
 
         private static void Execute(SourceProductionContext context, GrammarClassModel model, ImmutableArray<GrammarFile> files)
@@ -133,7 +171,7 @@ namespace EtAlii.Lark.Generators
             GrammarModel? grammarModel = null;
             try
             {
-                grammarModel = GrammarAnalyzer.Analyze(grammar, model.KeepAllTokens);
+                grammarModel = GrammarAnalyzer.Analyze(grammar, model.KeepAllTokens, model.MaybePlaceholders);
             }
             catch (GrammarSyntaxException e)
             {
@@ -142,7 +180,9 @@ namespace EtAlii.Lark.Generators
                     $"{e.Message} at line {e.Line}, column {e.Column}"));
             }
 
-            var source = new SourceEmitter(model, grammar, grammarModel).Emit();
+            var emitter = new SourceEmitter(model, grammar, grammarModel);
+            var source = emitter.Emit();
+            foreach (var diagnostic in emitter.Diagnostics) context.ReportDiagnostic(diagnostic);
             context.AddSource(HintName(model), SourceText.From(source, Encoding.UTF8));
         }
 

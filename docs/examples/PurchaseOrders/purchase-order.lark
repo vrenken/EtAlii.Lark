@@ -1,0 +1,43 @@
+// Purchase orders with order lines, shipping and pricing rules.
+// Used by docs/typed-visitor.md and tested by PurchaseOrderTests.
+
+order: "order" TEXT customer "currency" CURRENCY line+ [shipping] rule*
+
+customer: "customer" TEXT ["(" TIER ")"]
+
+line: "line" TEXT TEXT "qty" COUNT "at" AMOUNT ["discount" PERCENT]
+
+?shipping: "ship" "standard" "to" address    -> standard_shipping
+         | "ship" "express" "to" address     -> express_shipping
+         | "pickup" "at" TEXT                -> pickup
+
+address: TEXT+
+
+rule: "rule" "when" condition "then" action
+
+?condition: conjunction
+          | condition "or" conjunction       -> any_of
+?conjunction: test
+            | conjunction "and" test         -> all_of
+?test: FIELD OP operand                      -> comparison
+     | "(" condition ")"
+
+?operand: AMOUNT                             -> amount_operand
+        | COUNT                              -> count_operand
+        | TIER                               -> tier_operand
+
+?action: "discount" PERCENT                  -> percent_discount
+       | "free" "shipping"                   -> free_shipping
+       | "require" "approval" "by" TEXT      -> require_approval
+
+FIELD: "order.total" | "line.quantity" | "customer.tier"
+OP: "<=" | ">=" | "!=" | "=" | "<" | ">"
+TIER: "gold" | "silver" | "bronze"
+CURRENCY: "EUR" | "USD" | "GBP"
+AMOUNT.2: /\d+\.\d\d/
+PERCENT: /\d+(\.\d+)?%/
+
+%import common.ESCAPED_STRING -> TEXT
+%import common.INT -> COUNT
+%import common.WS
+%ignore WS

@@ -29,5 +29,35 @@ namespace EtAlii.Lark.Generators
             "Specify one grammar source",
             "The [LarkGrammar] attribute of '{0}' needs either a grammar file path or the Grammar property, but not both",
             Category, DiagnosticSeverity.Error, isEnabledByDefault: true);
+    
+        public static readonly DiagnosticDescriptor UnknownResultName = new(
+            "LARK005",
+            "Unknown name in [LarkResult]",
+            "'{0}' is not a rule, alias or terminal of the grammar of '{1}'",
+            Category, DiagnosticSeverity.Error, isEnabledByDefault: true);
+
+        public static readonly DiagnosticDescriptor DuplicateResultName = new(
+            "LARK006",
+            "Name mapped more than once",
+            "'{0}' appears in more than one [LarkResult] attribute of '{1}'",
+            Category, DiagnosticSeverity.Error, isEnabledByDefault: true);
+
+        public static readonly DiagnosticDescriptor NoCommonResultType = new(
+            "LARK007",
+            "No common result type",
+            "The children '{0}' of '{1}' can be {2}, which have no common base type; they are passed as object. {3}",
+            Category, DiagnosticSeverity.Warning, isEnabledByDefault: true);
+
+        public static readonly DiagnosticDescriptor ResultTypeMismatch = new(
+            "LARK008",
+            "Result type doesn't fit the inlined rule",
+            "The '{0}' rule is mapped to {1}, but it can contain '{2}', whose result type {3} doesn't convert to it",
+            Category, DiagnosticSeverity.Error, isEnabledByDefault: true);
+
+        public static readonly DiagnosticDescriptor NoFixedShape = new(
+            "LARK009",
+            "Node children have no fixed shape",
+            "The children of '{0}' have no fixed shape, so the typed visitor passes them as a list of objects. Aliases for its alternatives give each one typed parameters.",
+            Category, DiagnosticSeverity.Info, isEnabledByDefault: true);
     }
 }

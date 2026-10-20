@@ -17,6 +17,9 @@
     <None Include="Fixtures\**\*" CopyToOutputDirectory="PreserveNewest" />
     <EmbeddedResource Include="Fixtures\**\*.lark" />
     <AdditionalFiles Include="Generator\Grammars\*.lark" />
+    <!-- The example of docs/typed-visitor.md is compiled and tested here. -->
+    <Compile Include="..\..\docs\examples\PurchaseOrders\*.cs" Link="Examples\PurchaseOrders\%(Filename)%(Extension)" />
+    <AdditionalFiles Include="..\..\docs\examples\PurchaseOrders\*.lark" Link="Examples\PurchaseOrders\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>

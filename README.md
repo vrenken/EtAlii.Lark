@@ -132,6 +132,30 @@ class Evaluator : CalcParser.Visitor<double>
 double value = new Evaluator().Visit(CalcParser.Parse("1 + 2 * 3"));
 ```
 
+### Typed results per rule
+
+To have every rule return its own type, map rules, aliases and terminals to types with `[LarkResult]`. The generator then
+adds a typed, bottom-up `Visitor` whose visit methods receive their children already converted, as typed parameters:
+
+```csharp
+[LarkGrammar("calc.lark", Parser = ParserKind.Lalr)]
+[LarkResult(typeof(double), "add", "mul", "number", "NUMBER")]
+public partial class CalcParser;
+
+class Evaluator : CalcParser.Visitor
+{
+    protected override double VisitAdd(CalcParser.AddNode node, double sum, double product) => sum + product;
+    protected override double VisitMul(CalcParser.MulNode node, double product, double number) => product * number;
+    protected override double VisitNumber(CalcParser.NumberNode node, double number) => number;
+    protected override double VisitNumberToken(Token token) => double.Parse(token.Value, CultureInfo.InvariantCulture);
+}
+
+double value = new Evaluator().VisitStart(CalcParser.Parse("1 + 2 * 3"));
+```
+
+Repeated children arrive as lists, optional ones as nullable values, and children that can be one of several rules as
+their common base type. See [Typed visitors](docs/typed-visitor.md) for the rules and a larger purchase order example.
+
 You can also give the grammar inline, with `[LarkGrammar(Grammar = """ ... """)]`. To set any other option, implement
 `static partial void ConfigureOptions(LarkOptions options)` in the class. The generator reports these diagnostics:
 
@@ -141,6 +165,11 @@ You can also give the grammar inline, with `[LarkGrammar(Grammar = """ ... """)]
 | LARK002 | The grammar file is not one of the project's `AdditionalFiles`. |
 | LARK003 | The grammar could not be analyzed, so the parser was generated without typed nodes. |
 | LARK004 | Specify either a grammar file or `Grammar`, not both and not neither. |
+| LARK005 | A name in `[LarkResult]` is not a rule, alias or terminal of the grammar. |
+| LARK006 | A name appears in more than one `[LarkResult]`. |
+| LARK007 | The children at a position have no common result type, so they are passed as `object`. |
+| LARK008 | A child of an inlined rule has a result type that doesn't convert to the rule's result type. |
+| LARK009 | A mapped node has no fixed shape, so its children are passed as a list of objects. |
 
 ## Differences from Python Lark
 
