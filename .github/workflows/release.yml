@@ -1,0 +1,88 @@
+name: Release
+
+# Publishes the packable projects (currently only EtAlii.Lark, which bundles the source generator) to nuget.org.
+# Trigger it by pushing a version tag, for example:
+#   git tag v0.1.0 && git push origin v0.1.0
+# A tag with a suffix (v0.2.0-preview.1) produces a prerelease package.
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write   # create the GitHub release
+  id-token: write   # nuget.org trusted publishing (OIDC)
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: nuget
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Determine version
+        id: version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "Tag '$GITHUB_REF_NAME' is not a valid version tag (expected vMAJOR.MINOR.PATCH[-suffix])." >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if [[ "$version" == *-* ]]; then echo "prerelease=true" >> "$GITHUB_OUTPUT"; else echo "prerelease=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Restore
+        run: dotnet restore EtAlii.Lark.sln
+
+      - name: Build
+        run: dotnet build EtAlii.Lark.sln --configuration Release --no-restore -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Test
+        run: dotnet test EtAlii.Lark.sln --configuration Release --no-build
+
+      - name: Pack
+        run: dotnet pack EtAlii.Lark.sln --configuration Release --no-build --output artifacts -p:Version=${{ steps.version.outputs.version }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nuget
+          path: |
+            artifacts/*.nupkg
+            artifacts/*.snupkg
+
+      # Prefer nuget.org trusted publishing: it exchanges the GitHub OIDC token for a short-lived API key.
+      # Set the repository variable NUGET_USER to your nuget.org user name. If you'd rather use a long-lived
+      # API key, add it as the NUGET_API_KEY secret instead and this step is skipped.
+      - name: NuGet login (trusted publishing)
+        id: login
+        if: ${{ vars.NUGET_USER != '' }}
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Push to nuget.org
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY || secrets.NUGET_API_KEY }}
+        run: |
+          if [ -z "$NUGET_API_KEY" ]; then
+            echo "No nuget.org credentials: set the NUGET_USER variable (trusted publishing) or the NUGET_API_KEY secret." >&2
+            exit 1
+          fi
+          # Pushing the .nupkg also pushes the matching .snupkg symbol package.
+          dotnet nuget push "artifacts/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags="--generate-notes"
+          if [ "${{ steps.version.outputs.prerelease }}" = "true" ]; then flags="$flags --prerelease"; fi
+          gh release create "$GITHUB_REF_NAME" artifacts/*.nupkg artifacts/*.snupkg --title "$GITHUB_REF_NAME" $flags

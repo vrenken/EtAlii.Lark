@@ -168,6 +168,19 @@ It adds tests for streaming and for the source generator.
 dotnet test
 ```
 
+## Releasing
+
+Pushing a version tag publishes the package to nuget.org through the `Release` workflow, which builds, tests, packs
+(with symbols and SourceLink), pushes, and creates a GitHub release:
+
+```
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+A tag with a suffix, such as `v0.2.0-preview.1`, publishes a prerelease. The workflow authenticates with nuget.org
+trusted publishing when the `NUGET_USER` repository variable is set, or with the `NUGET_API_KEY` secret otherwise.
+
 ## License
 
 MIT; see [LICENSE](LICENSE). EtAlii.Lark contains code, grammars and tests ported from Lark (MIT, © Erez Shinan); see

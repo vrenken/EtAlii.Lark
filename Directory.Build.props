@@ -11,6 +11,22 @@
     <RepositoryUrl>https://github.com/vrenken/EtAlii.Lark</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/vrenken/EtAlii.Lark</PackageProjectUrl>
+    <!-- Local and CI builds get 0.1.0-dev; the release workflow overrides Version from the git tag. -->
     <VersionPrefix>0.1.0</VersionPrefix>
+    <!-- Projects opt in to packing explicitly; only EtAlii.Lark is published. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- Symbols and SourceLink (the .NET 8+ SDK includes the GitHub SourceLink provider). -->
+  <PropertyGroup>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 </Project>
