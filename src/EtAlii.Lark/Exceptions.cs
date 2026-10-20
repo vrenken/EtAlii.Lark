@@ -62,7 +62,7 @@ public class LexException : LarkException, ILexError
 /// <summary>
 /// Base class for <see cref="UnexpectedCharactersException"/>, <see cref="UnexpectedTokenException"/> and
 /// <see cref="UnexpectedEofException"/>. After catching one, use <see cref="GetContext"/> or
-/// <see cref="MatchExamples{T}"/> to create a nicer error message.
+/// <c>MatchExamples</c> to create a nicer error message.
 /// </summary>
 public abstract class UnexpectedInputException : LarkException
 {

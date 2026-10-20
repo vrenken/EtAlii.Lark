@@ -30,6 +30,13 @@ public sealed class Token : IEquatable<Token>, IEquatable<string>, IComparable<T
     /// <summary>Value of the token.</summary>
     public string Value { get; set; }
 
+    /// <summary>Deconstructs the token into its type and value, for positional patterns like <c>token is ("NAME", var name)</c>.</summary>
+    public void Deconstruct(out string type, out string value)
+    {
+        type = Type;
+        value = Value;
+    }
+
     /// <summary>The index of the token in the text.</summary>
     public int? StartPos { get; set; }
 

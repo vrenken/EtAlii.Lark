@@ -54,6 +54,13 @@ public class Tree : IEquatable<Tree>
     /// <summary>List of matched sub-rules (<see cref="Tree"/>), terminals (<see cref="Token"/>) and transformed values.</summary>
     public List<object?> Children { get; set; }
 
+    /// <summary>Deconstructs the tree into its data and children, for positional patterns like <c>tree is ("expr", [var left, _, var right])</c>.</summary>
+    public void Deconstruct(out string data, out List<object?> children)
+    {
+        data = Data;
+        children = Children;
+    }
+
     /// <summary>Line &amp; column numbers (if propagate_positions is enabled).</summary>
     public Meta Meta
     {
