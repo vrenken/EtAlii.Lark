@@ -157,9 +157,12 @@ internal static class CallbackBinder
         if (b.ByAttribute.TryGetValue(name, out var m)) return m;
         if (b.ByName.TryGetValue(name, out m)) return m;
         var pascal = ToPascalCase(name);
-        if (pascal.Length > 0 && pascal != name && b.ByName.TryGetValue(pascal, out m)) return m;
+        // Don't bind a rule to a terminal-like (all uppercase) method name, e.g. rule 'a' to method 'A'.
+        if (pascal.Length > 0 && pascal != name && !IsAllUpper(pascal) && b.ByName.TryGetValue(pascal, out m)) return m;
         return null;
     }
+
+    private static bool IsAllUpper(string s) => s.Any(char.IsLetter) && s.All(c => !char.IsLetter(c) || char.IsUpper(c));
 
     /// <summary>Finds the method bound to the given terminal name. Only methods accepting a single token qualify.</summary>
     public static BoundMethod? FindTerminal(Type type, string name)

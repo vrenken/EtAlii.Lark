@@ -128,7 +128,7 @@ public abstract class UnexpectedInputException : LarkException
                 }
                 catch (UnexpectedInputException ut)
                 {
-                    if (!Equals(ut.State, State)) continue;
+                    if (!StateEquals(ut.State, State)) continue;
 
                     if (useAccepts && this is UnexpectedTokenException self && ut is UnexpectedTokenException other)
                     {
@@ -165,6 +165,19 @@ public abstract class UnexpectedInputException : LarkException
     /// <summary>Overload accepting a sequence of (label, examples) tuples.</summary>
     public T? MatchExamples<T>(Func<string, object?> parseFn, IEnumerable<(T Label, string[] Examples)> examples, bool tokenTypeMatchFallback = false, bool useAccepts = true) =>
         MatchExamples(parseFn, examples.Select(e => new KeyValuePair<T, IEnumerable<string>>(e.Label, e.Examples)), tokenTypeMatchFallback, useAccepts);
+
+    /// <summary>Compares parser states; sets (like the expected terminals of the Earley parser) are compared by content.</summary>
+    private static bool StateEquals(object? a, object? b)
+    {
+        if (Equals(a, b)) return true;
+        if (a is System.Collections.IEnumerable ea and not string && b is System.Collections.IEnumerable eb and not string &&
+            a.GetType() == b.GetType())
+        {
+            var sa = ea.Cast<object?>().ToHashSet();
+            return sa.SetEquals(eb.Cast<object?>());
+        }
+        return false;
+    }
 
     private static Token TokenOf(UnexpectedInputException e) => e switch
     {

@@ -559,16 +559,53 @@ internal static class GrammarTransforms
                 var end = (Token)t.Children[1]!;
                 var s = start.Value[1..^1];
                 var e = end.Value[1..^1];
-                if (EvalEscaping.Eval(s).Length != 1 || EvalEscaping.Eval(e).Length != 1)
+                var sv = EvalEscaping.Eval(s);
+                var ev = EvalEscaping.Eval(e);
+                if (!IsSingleCodePoint(sv) || !IsSingleCodePoint(ev))
                 {
                     throw new GrammarException($"Range bounds must be single characters ({start}..{end})");
                 }
-                return new Tree("pattern", new List<object?> { new PatternRE($"[{s}-{e}]") });
+                var lo = char.ConvertToUtf32(sv, 0);
+                var hi = char.ConvertToUtf32(ev, 0);
+                // .NET strings are UTF-16: ranges beyond the BMP are expressed with surrogate pairs.
+                var regex = hi <= 0xFFFF ? $"[{s}-{e}]" : CodePointRangeRegex(lo, hi);
+                return new Tree("pattern", new List<object?> { new PatternRE(regex) });
             }
             default:
                 return t;
         }
     });
+
+    private static bool IsSingleCodePoint(string s) =>
+        s.Length == 1 ? !char.IsSurrogate(s[0]) : s.Length == 2 && char.IsSurrogatePair(s[0], s[1]);
+
+    /// <summary>A regular expression that matches the code points from <paramref name="lo"/> to <paramref name="hi"/> in UTF-16 text.</summary>
+    internal static string CodePointRangeRegex(int lo, int hi)
+    {
+        static string U(int c) => $"\\u{c:X4}";
+        var parts = new List<string>();
+        if (lo > hi) throw new GrammarException("Bad range: the start is larger than the end");
+        if (lo <= 0xFFFF)
+        {
+            parts.Add($"[{U(lo)}-{U(0xFFFF)}]");
+            lo = 0x10000;
+        }
+        var loHigh = 0xD800 + ((lo - 0x10000) >> 10);
+        var hiHigh = 0xD800 + ((hi - 0x10000) >> 10);
+        var loLow = 0xDC00 + ((lo - 0x10000) & 0x3FF);
+        var hiLow = 0xDC00 + ((hi - 0x10000) & 0x3FF);
+        if (loHigh == hiHigh)
+        {
+            parts.Add($"{U(loHigh)}[{U(loLow)}-{U(hiLow)}]");
+        }
+        else
+        {
+            parts.Add($"{U(loHigh)}[{U(loLow)}-{U(0xDFFF)}]");
+            if (hiHigh - loHigh > 1) parts.Add($"[{U(loHigh + 1)}-{U(hiHigh - 1)}][{U(0xDC00)}-{U(0xDFFF)}]");
+            parts.Add($"{U(hiHigh)}[{U(0xDC00)}-{U(hiLow)}]");
+        }
+        return "(?:" + string.Join("|", parts) + ")";
+    }
 
     public static object? ValidateSymbols(Tree tree) => InPlace(tree, t =>
     {

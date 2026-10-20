@@ -482,7 +482,7 @@ internal sealed class GrammarBuilder
                 keepAllTokens = m.Contains('!');
             }
 
-            int? priority = priorityTree.Children.Count > 0 ? int.Parse(priorityTree.Children.Single()!.ToString()!) : null;
+            int? priority = priorityTree.Children.Count > 0 ? ParsePriority(priorityTree.Children.Single()!.ToString()!) : null;
             parameters = paramsTree.Children.Select(t => ((Token)t!).Value).ToList();
             ruleOptions = new RuleOptions(keepAllTokens, expand1, priority, parameters.Count > 0 ? name : null);
             isTerm = false;
@@ -491,7 +491,7 @@ internal sealed class GrammarBuilder
         {
             name = ((Token)tree.Children[0]!).Value;
             parameters = Array.Empty<string>(); // TODO terminal templates
-            if (tree.Children.Count == 3) termPriority = int.Parse(tree.Children[1]!.ToString()!);
+            if (tree.Children.Count == 3) termPriority = ParsePriority(tree.Children[1]!.ToString()!);
             exp = (Tree)tree.Children[^1]!;
             isTerm = true;
         }
@@ -504,6 +504,20 @@ internal sealed class GrammarBuilder
 
         exp = MangleDefinitionTree(exp, mangle)!;
         return new UnpackedDefinition(name, isTerm, exp, parameters, termPriority, ruleOptions);
+    }
+
+    private const int MaxPriority = 1_000_000_000;
+
+    /// <summary>
+    /// Parses a priority. Python has arbitrary precision integers; here huge values are clamped to ±1e9, which leaves
+    /// room for summing and negating priorities without overflowing.
+    /// </summary>
+    private static int ParsePriority(string s)
+    {
+        var value = System.Numerics.BigInteger.Parse(s, System.Globalization.CultureInfo.InvariantCulture);
+        if (value > MaxPriority) return MaxPriority;
+        if (value < -MaxPriority) return -MaxPriority;
+        return (int)value;
     }
 
     private void DefineUnpacked(UnpackedDefinition d, bool @override = false) =>

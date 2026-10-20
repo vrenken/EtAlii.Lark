@@ -185,7 +185,11 @@ public sealed partial class Lark
         var options = userOptions?.Clone() ?? new LarkOptions();
         options.Parser = Enum.Parse<ParserKind>(o.GetProperty("parser").GetString()!);
         var savedLexer = Enum.Parse<LexerKind>(o.GetProperty("lexer").GetString()!);
-        if (!(savedLexer == LexerKind.Custom && options.CustomLexer is not null)) options.Lexer = savedLexer;
+        if (savedLexer == LexerKind.Custom && options.CustomLexer is null)
+        {
+            throw new ConfigurationException("The parser was saved with a custom lexer; pass the CustomLexer in the options when loading it.");
+        }
+        options.Lexer = savedLexer;
         options.Start = o.GetProperty("start").EnumerateArray().Select(e => e.GetString()!).ToList();
         if (userOptions is null) options.Debug = o.GetProperty("debug").GetBoolean();
         options.Strict = o.GetProperty("strict").GetBoolean();
