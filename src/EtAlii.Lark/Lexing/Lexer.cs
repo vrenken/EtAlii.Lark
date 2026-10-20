@@ -312,6 +312,10 @@ public class BasicLexer : AbstractBasicLexer
             {
                 RegexCollisions.Check(terminals, conf.RegexOptions, strict: true);
             }
+            else if (LarkLog.IsEnabled(LarkLogLevel.Warning))
+            {
+                RegexCollisions.Check(terminals, conf.RegexOptions, strict: false);
+            }
         }
 
         NewlineTypes = terminals.Where(t => RegexpHasNewline(t.Pattern.ToRegexp())).Select(t => t.Name).ToHashSet();

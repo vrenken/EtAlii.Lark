@@ -166,6 +166,13 @@ public class Transformer : ITransformer
         return res[0];
     }
 
+    /// <summary>Transform a single token (calls the method for its terminal, when <see cref="VisitTokens"/> is set). Returns null when discarded.</summary>
+    public object? Transform(Token token)
+    {
+        var res = VisitTokens ? CallUserFuncToken(token) : token;
+        return ReferenceEquals(res, Discard.Value) ? null : res;
+    }
+
     /// <summary>Transform the given tree and cast the result.</summary>
     public T Transform<T>(Tree tree) => (T)Transform(tree)!;
 

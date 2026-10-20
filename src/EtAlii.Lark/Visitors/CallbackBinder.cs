@@ -207,7 +207,7 @@ internal static class CallbackBinder
         for (var t = type; t is not null && t != typeof(object); t = t.BaseType)
         {
             if (t.Assembly == LibraryAssembly) break;
-            var methods = t.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+            var methods = t.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
             foreach (var method in methods)
             {
                 if (method.IsSpecialName || method.IsGenericMethodDefinition) continue;
