@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>EtAlii.Lark</RootNamespace>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <IsPackable>true</IsPackable>
+    <PackageId>EtAlii.Lark</PackageId>
+    <Description>A full-featured port of the Lark parsing toolkit to .NET: Lark EBNF grammars, Earley/LALR(1)/CYK parsers, basic/contextual/dynamic lexers, tree building, transformers and visitors, plus a Roslyn source generator that turns a grammar into a type-safe parser.</Description>
+    <PackageTags>lark;parser;grammar;ebnf;lalr;earley;cyk;lexer;cfg;source-generator</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Grammars\*.lark" LogicalName="EtAlii.Lark.Grammars.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    <!-- Bundle the source generator as an analyzer in the same package. -->
+    <None Include="..\EtAlii.Lark.Generators\bin\$(Configuration)\netstandard2.0\EtAlii.Lark.Generators.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EtAlii.Lark.Generators\EtAlii.Lark.Generators.csproj" ReferenceOutputAssembly="false" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="EtAlii.Lark.Tests" />
+  </ItemGroup>
+
+</Project>
