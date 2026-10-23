@@ -129,6 +129,31 @@ jobs:
       - name: Package
         run: npm pack
 
+      - name: Generate code with the packaged command line
+        run: |
+          mkdir -p "$RUNNER_TEMP/generate" && cd "$RUNNER_TEMP/generate"
+          echo '{ "name": "generate", "private": true, "type": "module" }' > package.json
+          npm install "$GITHUB_WORKSPACE"/typescript/etalii-lark-*.tgz typescript@5
+          cp "$GITHUB_WORKSPACE/typescript/test/codegen/calc.lark" .
+          npx etalii-lark generate calc.lark --parser lalr
+          cat > main.ts <<'TS'
+          import * as Calc from './calc.lark.js';
+          type Results = { add: number; sub: number; mul: number; div: number; neg: number; number: number; NUMBER: number };
+          const evaluate = Calc.visitor<Results>({
+            add: (_, a, b) => a + b,
+            sub: (_, a, b) => a - b,
+            mul: (_, a, b) => a * b,
+            div: (_, a, b) => a / b,
+            neg: (_, a) => -a,
+            number: (_, n) => n,
+            NUMBER: (token) => Number(token.value),
+          });
+          const value: number = evaluate(Calc.parse('1 + 2 * (3 - 4)'));
+          if (value !== -1) throw new Error(`1 + 2 * (3 - 4) gave ${value}`);
+          TS
+          npx tsc --module nodenext --target es2022 --strict main.ts
+          node main.js
+
       - uses: actions/upload-artifact@v4
         with:
           name: npm
