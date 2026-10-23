@@ -1,0 +1,22 @@
+[package]
+name = "etalii-lark"
+description = "A port of the Lark parsing toolkit to Rust: Lark EBNF grammars, Earley/LALR(1)/CYK parsers, basic/contextual/dynamic lexers, tree building, transformers and visitors."
+keywords = ["lark", "parser", "grammar", "earley", "lalr"]
+categories = ["parsing", "parser-implementations"]
+readme = "README.md"
+include = ["src/**/*.rs", "grammars/*.lark", "README.md", "LICENSE", "THIRD-PARTY-NOTICES.md"]
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[dependencies]
+fancy-regex = "0.19"
+regex-automata = { version = "0.4", default-features = false, features = ["std", "syntax", "perf", "unicode", "meta", "nfa", "dfa", "hybrid"] }
+regex-syntax = "0.8"
+indexmap = "2"
+
+[dev-dependencies]
+serde_json = "1"
