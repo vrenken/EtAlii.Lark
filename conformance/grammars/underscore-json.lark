@@ -1,0 +1,28 @@
+// Lark's examples/advanced/dynamic_complete.py: JSON with "_" as the quote character.
+%import common.SIGNED_NUMBER
+%import common.WS_INLINE
+%import common.NEWLINE
+%ignore WS_INLINE
+
+?start: value
+
+?value: object
+      | array
+      | string
+      | SIGNED_NUMBER      -> number
+      | "true"             -> true
+      | "false"            -> false
+      | "null"             -> null
+
+array  : "[" (value ("," value)*)? "]"
+object : "{" (pair ("," pair)*)? "}"
+pair   : string ":" value
+
+string: STRING
+STRING : ESCAPED_STRING
+
+ESCAPED_STRING: QUOTE_CHAR _STRING_ESC_INNER QUOTE_CHAR
+QUOTE_CHAR: "_"
+
+_STRING_INNER: /.*/
+_STRING_ESC_INNER: _STRING_INNER /(?<!\\)(\\\\)*?/

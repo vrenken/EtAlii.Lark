@@ -1,0 +1,862 @@
+{
+ "cases": [
+  {
+   "grammar_file": "grammars/calc.lark",
+   "options": {
+    "parser": "lalr",
+    "lexer": "contextual"
+   },
+   "inputs": [
+    {
+     "input": "1"
+    },
+    {
+     "input": "1 + 2"
+    },
+    {
+     "input": "1 + 2 * 3 - 4 / 5"
+    },
+    {
+     "input": "-(1 + 2) * -x"
+    },
+    {
+     "input": "a = 1 + b * 2"
+    },
+    {
+     "input": "((((1))))"
+    },
+    {
+     "input": "1 +"
+    },
+    {
+     "input": "1 + * 2"
+    },
+    {
+     "input": "a = "
+    },
+    {
+     "input": "1 2"
+    },
+    {
+     "input": "3.25e-2 * 7"
+    },
+    {
+     "input": ""
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/calc.lark",
+   "options": {
+    "parser": "lalr",
+    "lexer": "basic"
+   },
+   "inputs": [
+    {
+     "input": "1"
+    },
+    {
+     "input": "1 + 2"
+    },
+    {
+     "input": "1 + 2 * 3 - 4 / 5"
+    },
+    {
+     "input": "-(1 + 2) * -x"
+    },
+    {
+     "input": "a = 1 + b * 2"
+    },
+    {
+     "input": "((((1))))"
+    },
+    {
+     "input": "1 +"
+    },
+    {
+     "input": "1 + * 2"
+    },
+    {
+     "input": "a = "
+    },
+    {
+     "input": "1 2"
+    },
+    {
+     "input": "3.25e-2 * 7"
+    },
+    {
+     "input": ""
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/calc.lark",
+   "options": {
+    "parser": "earley",
+    "lexer": "dynamic"
+   },
+   "inputs": [
+    {
+     "input": "1"
+    },
+    {
+     "input": "1 + 2"
+    },
+    {
+     "input": "1 + 2 * 3 - 4 / 5"
+    },
+    {
+     "input": "-(1 + 2) * -x"
+    },
+    {
+     "input": "a = 1 + b * 2"
+    },
+    {
+     "input": "((((1))))"
+    },
+    {
+     "input": "1 +"
+    },
+    {
+     "input": "1 + * 2"
+    },
+    {
+     "input": "a = "
+    },
+    {
+     "input": "1 2"
+    },
+    {
+     "input": "3.25e-2 * 7"
+    },
+    {
+     "input": ""
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/calc.lark",
+   "options": {
+    "parser": "earley",
+    "lexer": "basic"
+   },
+   "inputs": [
+    {
+     "input": "1"
+    },
+    {
+     "input": "1 + 2"
+    },
+    {
+     "input": "1 + 2 * 3 - 4 / 5"
+    },
+    {
+     "input": "-(1 + 2) * -x"
+    },
+    {
+     "input": "a = 1 + b * 2"
+    },
+    {
+     "input": "((((1))))"
+    },
+    {
+     "input": "1 +"
+    },
+    {
+     "input": "1 + * 2"
+    },
+    {
+     "input": "a = "
+    },
+    {
+     "input": "1 2"
+    },
+    {
+     "input": "3.25e-2 * 7"
+    },
+    {
+     "input": ""
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/calc.lark",
+   "options": {
+    "parser": "earley",
+    "lexer": "dynamic_complete"
+   },
+   "inputs": [
+    {
+     "input": "1"
+    },
+    {
+     "input": "1 + 2"
+    },
+    {
+     "input": "1 + 2 * 3 - 4 / 5"
+    },
+    {
+     "input": "-(1 + 2) * -x"
+    },
+    {
+     "input": "a = 1 + b * 2"
+    },
+    {
+     "input": "((((1))))"
+    },
+    {
+     "input": "1 +"
+    },
+    {
+     "input": "1 + * 2"
+    },
+    {
+     "input": "a = "
+    },
+    {
+     "input": "1 2"
+    },
+    {
+     "input": "3.25e-2 * 7"
+    },
+    {
+     "input": ""
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/calc.lark",
+   "options": {
+    "parser": "lalr",
+    "keep_all_tokens": true
+   },
+   "inputs": [
+    {
+     "input": "1"
+    },
+    {
+     "input": "1 + 2"
+    },
+    {
+     "input": "1 + 2 * 3 - 4 / 5"
+    },
+    {
+     "input": "-(1 + 2) * -x"
+    },
+    {
+     "input": "a = 1 + b * 2"
+    },
+    {
+     "input": "((((1))))"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/json.lark",
+   "options": {
+    "parser": "lalr",
+    "lexer": "contextual"
+   },
+   "inputs": [
+    {
+     "input": "{}"
+    },
+    {
+     "input": "[]"
+    },
+    {
+     "input": "[1, 2.5, -3e10, \"x\", true, false, null]"
+    },
+    {
+     "input": "{\"a\": {\"b\": [1, {\"c\": \"\\\"quoted\\\" \\\\ text\"}]}, \"d\": []}"
+    },
+    {
+     "input": "{\"unicode\": \"héllo wörld ☃\"}"
+    },
+    {
+     "input": "  [ 1 ,\n 2 ,\n\t3 ]  "
+    },
+    {
+     "input": "{\"a\" 1}"
+    },
+    {
+     "input": "[1, 2,]"
+    },
+    {
+     "input": "{\"a\": }"
+    },
+    {
+     "input": "\"str\""
+    },
+    {
+     "input": "-0.5"
+    },
+    {
+     "input": "[1, [2, [3, [4, [5]]]]]"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/json.lark",
+   "options": {
+    "parser": "lalr",
+    "lexer": "basic"
+   },
+   "inputs": [
+    {
+     "input": "{}"
+    },
+    {
+     "input": "[]"
+    },
+    {
+     "input": "[1, 2.5, -3e10, \"x\", true, false, null]"
+    },
+    {
+     "input": "{\"a\": {\"b\": [1, {\"c\": \"\\\"quoted\\\" \\\\ text\"}]}, \"d\": []}"
+    },
+    {
+     "input": "{\"unicode\": \"héllo wörld ☃\"}"
+    },
+    {
+     "input": "  [ 1 ,\n 2 ,\n\t3 ]  "
+    },
+    {
+     "input": "{\"a\" 1}"
+    },
+    {
+     "input": "[1, 2,]"
+    },
+    {
+     "input": "{\"a\": }"
+    },
+    {
+     "input": "\"str\""
+    },
+    {
+     "input": "-0.5"
+    },
+    {
+     "input": "[1, [2, [3, [4, [5]]]]]"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/json.lark",
+   "options": {
+    "parser": "earley",
+    "lexer": "dynamic"
+   },
+   "inputs": [
+    {
+     "input": "{}"
+    },
+    {
+     "input": "[]"
+    },
+    {
+     "input": "[1, 2.5, -3e10, \"x\", true, false, null]"
+    },
+    {
+     "input": "{\"a\": {\"b\": [1, {\"c\": \"\\\"quoted\\\" \\\\ text\"}]}, \"d\": []}"
+    },
+    {
+     "input": "{\"unicode\": \"héllo wörld ☃\"}"
+    },
+    {
+     "input": "  [ 1 ,\n 2 ,\n\t3 ]  "
+    },
+    {
+     "input": "{\"a\" 1}"
+    },
+    {
+     "input": "[1, 2,]"
+    },
+    {
+     "input": "{\"a\": }"
+    },
+    {
+     "input": "\"str\""
+    },
+    {
+     "input": "-0.5"
+    },
+    {
+     "input": "[1, [2, [3, [4, [5]]]]]"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/json.lark",
+   "options": {
+    "parser": "earley",
+    "lexer": "basic"
+   },
+   "inputs": [
+    {
+     "input": "{}"
+    },
+    {
+     "input": "[]"
+    },
+    {
+     "input": "[1, 2.5, -3e10, \"x\", true, false, null]"
+    },
+    {
+     "input": "{\"a\": {\"b\": [1, {\"c\": \"\\\"quoted\\\" \\\\ text\"}]}, \"d\": []}"
+    },
+    {
+     "input": "{\"unicode\": \"héllo wörld ☃\"}"
+    },
+    {
+     "input": "  [ 1 ,\n 2 ,\n\t3 ]  "
+    },
+    {
+     "input": "{\"a\" 1}"
+    },
+    {
+     "input": "[1, 2,]"
+    },
+    {
+     "input": "{\"a\": }"
+    },
+    {
+     "input": "\"str\""
+    },
+    {
+     "input": "-0.5"
+    },
+    {
+     "input": "[1, [2, [3, [4, [5]]]]]"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/json.lark",
+   "options": {
+    "parser": "lalr",
+    "maybe_placeholders": false
+   },
+   "inputs": [
+    {
+     "input": "{}"
+    },
+    {
+     "input": "[]"
+    },
+    {
+     "input": "[1, 2.5, -3e10, \"x\", true, false, null]"
+    },
+    {
+     "input": "{\"a\": {\"b\": [1, {\"c\": \"\\\"quoted\\\" \\\\ text\"}]}, \"d\": []}"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/json.lark",
+   "options": {
+    "parser": "lalr"
+   },
+   "inputs": [
+    {
+     "lex": "{\"a\": [1, 2]}"
+    },
+    {
+     "lex": " [ true ,\n null ] ",
+     "dont_ignore": true
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/fruitflies.lark",
+   "options": {
+    "start": "sentence",
+    "ambiguity": "explicit"
+   },
+   "inputs": [
+    {
+     "input": "fruit flies like bananas"
+    },
+    {
+     "input": "flies like fruit"
+    },
+    {
+     "input": "fruit fruit flies like bananas"
+    },
+    {
+     "input": "bananas like"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/fruitflies.lark",
+   "options": {
+    "start": "sentence",
+    "ambiguity": "resolve"
+   },
+   "inputs": [
+    {
+     "input": "fruit flies like bananas"
+    },
+    {
+     "input": "flies like fruit"
+    },
+    {
+     "input": "fruit fruit flies like bananas"
+    },
+    {
+     "input": "bananas like"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/fruitflies.lark",
+   "options": {
+    "start": "sentence",
+    "ambiguity": "explicit",
+    "lexer": "dynamic_complete"
+   },
+   "inputs": [
+    {
+     "input": "fruit flies like bananas"
+    },
+    {
+     "input": "flies like fruit"
+    },
+    {
+     "input": "fruit fruit flies like bananas"
+    },
+    {
+     "input": "bananas like"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/underscore-json.lark",
+   "options": {
+    "lexer": "dynamic_complete"
+   },
+   "inputs": [
+    {
+     "input": "{_foo_:{}, _bar_: [], _baz_: __}"
+    },
+    {
+     "input": "[_a_, _b_]"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/underscore-json.lark",
+   "options": {
+    "lexer": "dynamic_complete",
+    "ambiguity": "explicit"
+   },
+   "inputs": [
+    {
+     "input": "[_a_, _b_]"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/features.lark",
+   "options": {
+    "parser": "earley",
+    "lexer": "dynamic"
+   },
+   "inputs": [
+    {
+     "input": "x = 1 + 2 * (3 - y);"
+    },
+    {
+     "input": "print 'a', [1,2], [], true or false and 1 < 2;"
+    },
+    {
+     "input": "{ a = -b % 3; { } f(); g(1, 'two', [3]); } # comment"
+    },
+    {
+     "input": "x = a b !;"
+    },
+    {
+     "input": "x = a b c !;"
+    },
+    {
+     "input": "x = a b c d !;"
+    },
+    {
+     "input": "x = 1 == 2 == 3;"
+    },
+    {
+     "input": "f(;"
+    },
+    {
+     "input": "x = 'unterminated;"
+    },
+    {
+     "input": "print ;"
+    },
+    {
+     "input": "Mixed_Case9 = TRUE;"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/features.lark",
+   "options": {
+    "parser": "earley",
+    "lexer": "basic"
+   },
+   "inputs": [
+    {
+     "input": "x = 1 + 2 * (3 - y);"
+    },
+    {
+     "input": "print 'a', [1,2], [], true or false and 1 < 2;"
+    },
+    {
+     "input": "{ a = -b % 3; { } f(); g(1, 'two', [3]); } # comment"
+    },
+    {
+     "input": "x = a b !;"
+    },
+    {
+     "input": "x = a b c !;"
+    },
+    {
+     "input": "x = a b c d !;"
+    },
+    {
+     "input": "x = 1 == 2 == 3;"
+    },
+    {
+     "input": "f(;"
+    },
+    {
+     "input": "x = 'unterminated;"
+    },
+    {
+     "input": "print ;"
+    },
+    {
+     "input": "Mixed_Case9 = TRUE;"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/features.lark",
+   "options": {
+    "parser": "lalr",
+    "lexer": "contextual"
+   },
+   "inputs": [
+    {
+     "input": "x = 1 + 2 * (3 - y);"
+    },
+    {
+     "input": "print 'a', [1,2], [], true or false and 1 < 2;"
+    },
+    {
+     "input": "{ a = -b % 3; { } f(); g(1, 'two', [3]); } # comment"
+    },
+    {
+     "input": "x = a b !;"
+    },
+    {
+     "input": "x = a b c !;"
+    },
+    {
+     "input": "x = a b c d !;"
+    },
+    {
+     "input": "x = 1 == 2 == 3;"
+    },
+    {
+     "input": "f(;"
+    },
+    {
+     "input": "x = 'unterminated;"
+    },
+    {
+     "input": "print ;"
+    },
+    {
+     "input": "Mixed_Case9 = TRUE;"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/features.lark",
+   "options": {
+    "parser": "earley",
+    "ambiguity": "explicit"
+   },
+   "inputs": [
+    {
+     "input": "x = 1 + 2 * (3 - y);"
+    },
+    {
+     "input": "print 'a', [1,2], [], true or false and 1 < 2;"
+    },
+    {
+     "input": "{ a = -b % 3; { } f(); g(1, 'two', [3]); } # comment"
+    },
+    {
+     "input": "x = a b !;"
+    },
+    {
+     "input": "x = a b c !;"
+    },
+    {
+     "input": "x = a b c d !;"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/features.lark",
+   "options": {
+    "parser": "earley",
+    "priority": "invert"
+   },
+   "inputs": [
+    {
+     "input": "x = 1 + 2 * (3 - y);"
+    },
+    {
+     "input": "print 'a', [1,2], [], true or false and 1 < 2;"
+    },
+    {
+     "input": "{ a = -b % 3; { } f(); g(1, 'two', [3]); } # comment"
+    },
+    {
+     "input": "x = a b !;"
+    },
+    {
+     "input": "x = a b c !;"
+    },
+    {
+     "input": "x = a b c d !;"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/csv.lark",
+   "options": {
+    "parser": "lalr"
+   },
+   "inputs": [
+    {
+     "input": "# a,b,c\n1,2,3\nx y;z\n"
+    },
+    {
+     "input": "#name\tage\nSmith 42\nDoe\t7.5\n-1.5 a/b\n"
+    },
+    {
+     "input": "a,b\n"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/csv.lark",
+   "options": {
+    "parser": "earley"
+   },
+   "inputs": [
+    {
+     "input": "# a,b,c\n1,2,3\nx y;z\n"
+    },
+    {
+     "input": "#name\tage\nSmith 42\nDoe\t7.5\n-1.5 a/b\n"
+    },
+    {
+     "input": "a,b\n"
+    }
+   ]
+  },
+  {
+   "grammar_file": "grammars/verilog.lark",
+   "options": {
+    "parser": "lalr"
+   },
+   "inputs": [
+    {
+     "input": "module m(a, b);\n  input a;\n  output b;\n  assign b = a;\nendmodule\n"
+    }
+   ]
+  },
+  {
+   "grammar_file": "lark:python.lark",
+   "options": {
+    "parser": "lalr",
+    "postlex": "python_indenter",
+    "start": "file_input"
+   },
+   "inputs": [
+    {
+     "input": "x = 1\n"
+    },
+    {
+     "input": "def f(a, b=2, *args, **kw):\n    if a:\n        return b\n    else:\n        pass\n"
+    },
+    {
+     "input": "class C(Base):\n    \"\"\"doc\"\"\"\n    def m(self):\n        return [i * 2 for i in range(10) if i % 2]\n"
+    },
+    {
+     "input": "try:\n    x = {1: \"a\", **d}\nexcept (ValueError, TypeError) as e:\n    raise\nfinally:\n    del x\n"
+    },
+    {
+     "input": "async def g():\n    async with a as b:\n        await c\n    yield from d\n"
+    },
+    {
+     "input": "lambda x, *, y=3: x + y\n"
+    },
+    {
+     "input": "x = f\"{a!r:>10}\" + b\"\\x00\" + r\"\\n\"\n"
+    },
+    {
+     "input": "match p:\n    case [1, *rest]:\n        pass\n    case {\"k\": v} if v:\n        pass\n"
+    },
+    {
+     "input": "if x:\npass\n"
+    },
+    {
+     "input": "x = (1,\n     2)\n"
+    },
+    {
+     "input": "@dec\ndef f(): ...\n"
+    },
+    {
+     "input": "print(1 if a else 2, end=\"\")\n"
+    },
+    {
+     "input": "x = = 1\n"
+    }
+   ]
+  },
+  {
+   "grammar_file": "lark:lark.lark",
+   "options": {
+    "parser": "lalr"
+   },
+   "inputs": [
+    {
+     "input": "// The calculator of Lark's examples/calc.py.\n?start: sum\n      | NAME \"=\" sum    -> assign_var\n\n?sum: product\n    | sum \"+\" product   -> add\n    | sum \"-\" product   -> sub\n\n?product: atom\n    | product \"*\" atom  -> mul\n    | product \"/\" atom  -> div\n\n?atom: NUMBER           -> number\n     | \"-\" atom         -> neg\n     | NAME             -> var\n     | \"(\" sum \")\"\n\n%import common.CNAME -> NAME\n%import common.NUMBER\n%import common.WS_INLINE\n\n%ignore WS_INLINE\n"
+    },
+    {
+     "input": "// The JSON grammar of Lark's examples/json_parser.py.\n?start: value\n\n?value: object\n      | array\n      | string\n      | SIGNED_NUMBER      -> number\n      | \"true\"             -> true\n      | \"false\"            -> false\n      | \"null\"             -> null\n\narray  : \"[\" [value (\",\" value)*] \"]\"\nobject : \"{\" [pair (\",\" pair)*] \"}\"\npair   : string \":\" value\n\nstring : ESCAPED_STRING\n\n%import common.ESCAPED_STRING\n%import common.SIGNED_NUMBER\n%import common.WS\n\n%ignore WS\n"
+    },
+    {
+     "input": "// Exercises many grammar features at once: templates, priorities, aliases, inlining, kept tokens,\n// maybe-placeholders, repetition ranges, terminal composition and %declare-free imports.\nstart: statement*\n\n?statement: assignment \";\"\n          | call \";\"\n          | block\n          | \"print\" _list{expr} \";\"     -> print\n\nassignment: NAME \"=\" expr\ncall: NAME \"(\" [_list{expr}] \")\"\nblock: \"{\" statement* \"}\"\n\n_list{item}: item (\",\" item)*\n\n?expr: expr \"or\" and_expr     -> or_\n     | and_expr\n?and_expr: and_expr \"and\" comparison -> and_\n     | comparison\n?comparison: sum (COMP_OP sum)?\n?sum: sum ADD_OP term         -> binop\n    | term\n?term: term MUL_OP factor     -> binop\n     | factor\n?factor: \"-\" factor           -> neg\n       | atom\n?atom: NUMBER                 -> number\n     | STRING                 -> string\n     | NAME                   -> var\n     | \"(\" expr \")\"\n     | \"[\" [_list{expr}] \"]\"  -> list\n     | boolean\n     | NAME~2..3 \"!\"           -> words\n\n!boolean: \"true\" | \"false\"\n\nCOMP_OP: \"==\" | \"!=\" | \"<=\" | \">=\" | \"<\" | \">\"\nADD_OP: \"+\" | \"-\"\nMUL_OP: \"*\" | \"/\" | \"%\"\nNAME.-1: /[a-z_][a-z0-9_]*/i\nNUMBER: DIGIT+ (\".\" DIGIT+)?\nSTRING: \"'\" /[^']*/ \"'\"\nDIGIT: \"0\"..\"9\"\nCOMMENT: /#[^\\n]*/\n\n%import common.WS\n%ignore WS\n%ignore COMMENT\n"
+    },
+    {
+     "input": "// Lark's examples/advanced/dynamic_complete.py: JSON with \"_\" as the quote character.\n%import common.SIGNED_NUMBER\n%import common.WS_INLINE\n%import common.NEWLINE\n%ignore WS_INLINE\n\n?start: value\n\n?value: object\n      | array\n      | string\n      | SIGNED_NUMBER      -> number\n      | \"true\"             -> true\n      | \"false\"            -> false\n      | \"null\"             -> null\n\narray  : \"[\" (value (\",\" value)*)? \"]\"\nobject : \"{\" (pair (\",\" pair)*)? \"}\"\npair   : string \":\" value\n\nstring: STRING\nSTRING : ESCAPED_STRING\n\nESCAPED_STRING: QUOTE_CHAR _STRING_ESC_INNER QUOTE_CHAR\nQUOTE_CHAR: \"_\"\n\n_STRING_INNER: /.*/\n_STRING_ESC_INNER: _STRING_INNER /(?<!\\\\)(\\\\\\\\)*?/\n"
+    },
+    {
+     "input": "start: a\na: \"x\" \"y\" ->"
+    },
+    {
+     "input": "start: \"a\"\n%import common.WS\n"
+    }
+   ]
+  }
+ ]
+}

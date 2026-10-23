@@ -24,6 +24,9 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     environment: nuget
+    defaults:
+      run:
+        working-directory: dotnet
     steps:
       - uses: actions/checkout@v4
         with:
@@ -69,8 +72,8 @@ jobs:
         with:
           name: nuget
           path: |
-            artifacts/*.nupkg
-            artifacts/*.snupkg
+            dotnet/artifacts/*.nupkg
+            dotnet/artifacts/*.snupkg
 
       # Prefer nuget.org trusted publishing: it exchanges the GitHub OIDC token for a short-lived API key.
       # Set NUGET_USER (a repository variable or secret) to your nuget.org user name. If you'd rather use a

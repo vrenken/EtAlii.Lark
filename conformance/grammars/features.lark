@@ -1,0 +1,48 @@
+// Exercises many grammar features at once: templates, priorities, aliases, inlining, kept tokens,
+// maybe-placeholders, repetition ranges, terminal composition and %declare-free imports.
+start: statement*
+
+?statement: assignment ";"
+          | call ";"
+          | block
+          | "print" _list{expr} ";"     -> print
+
+assignment: NAME "=" expr
+call: NAME "(" [_list{expr}] ")"
+block: "{" statement* "}"
+
+_list{item}: item ("," item)*
+
+?expr: expr "or" and_expr     -> or_
+     | and_expr
+?and_expr: and_expr "and" comparison -> and_
+     | comparison
+?comparison: sum (COMP_OP sum)?
+?sum: sum ADD_OP term         -> binop
+    | term
+?term: term MUL_OP factor     -> binop
+     | factor
+?factor: "-" factor           -> neg
+       | atom
+?atom: NUMBER                 -> number
+     | STRING                 -> string
+     | NAME                   -> var
+     | "(" expr ")"
+     | "[" [_list{expr}] "]"  -> list
+     | boolean
+     | NAME~2..3 "!"           -> words
+
+!boolean: "true" | "false"
+
+COMP_OP: "==" | "!=" | "<=" | ">=" | "<" | ">"
+ADD_OP: "+" | "-"
+MUL_OP: "*" | "/" | "%"
+NAME.-1: /[a-z_][a-z0-9_]*/i
+NUMBER: DIGIT+ ("." DIGIT+)?
+STRING: "'" /[^']*/ "'"
+DIGIT: "0".."9"
+COMMENT: /#[^\n]*/
+
+%import common.WS
+%ignore WS
+%ignore COMMENT
