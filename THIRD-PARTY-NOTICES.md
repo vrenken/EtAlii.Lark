@@ -1,6 +1,6 @@
 # Third-party notices
 
-EtAlii.Lark is a port of [Lark](https://github.com/lark-parser/lark) to .NET. It contains code translated from Lark,
+The EtAlii.Lark packages are ports of [Lark](https://github.com/lark-parser/lark) to .NET, Rust and TypeScript. They contain code translated from Lark,
 the grammars `common.lark`, `lark.lark`, `python.lark` and `unicode.lark`, and tests and test grammars ported from
 Lark's test suite. Lark is distributed under the MIT license:
 
