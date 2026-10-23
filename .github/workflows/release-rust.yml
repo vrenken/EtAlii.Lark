@@ -1,0 +1,80 @@
+name: Release (crates.io)
+
+# Publishes the etalii-lark crate to crates.io, with the same version tags as the NuGet release, for example:
+#   git tag v0.1.0 && git push origin v0.1.0
+# It can also be started by hand (Actions > Release (crates.io) > Run workflow) with a version.
+#
+# Nothing is published until the repository variable PUBLISH_CRATES is set to "true". Credentials:
+# - The first release needs a crates.io API token (with the publish-new scope) in the CARGO_REGISTRY_TOKEN secret,
+#   because crates.io trusted publishing can only be configured for a crate that exists.
+# - After that, configure trusted publishing on crates.io (crate settings > Trusted Publishing: this repository,
+#   workflow release-rust.yml, environment crates-io) and delete the secret; the workflow then uses GitHub OIDC.
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish, without the leading v (for example 0.1.0 or 0.2.0-preview.1)'
+        required: true
+
+permissions:
+  contents: read
+  id-token: write   # crates.io trusted publishing (OIDC)
+
+jobs:
+  publish:
+    if: ${{ vars.PUBLISH_CRATES == 'true' }}
+    runs-on: ubuntu-latest
+    environment: crates-io
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Determine version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            version="${INPUT_VERSION#v}"
+          else
+            version="${GITHUB_REF_NAME#v}"
+          fi
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "'$version' is not a valid version (expected MAJOR.MINOR.PATCH[-suffix])." >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set the version
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          sed -i "0,/^version = \".*\"/s//version = \"$VERSION\"/" Cargo.toml
+          cargo update --workspace
+
+      - name: Test
+        run: cargo test --release --locked
+
+      - name: Check for an API token
+        id: token
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: echo "present=$([ -n "$CARGO_REGISTRY_TOKEN" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
+      - name: crates.io login (trusted publishing)
+        id: auth
+        if: ${{ steps.token.outputs.present != 'true' }}
+        uses: rust-lang/crates-io-auth-action@v1
+
+      - name: Publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || steps.auth.outputs.token }}
+        # --allow-dirty: the version was just set from the tag.
+        run: cargo publish --locked --allow-dirty -p etalii-lark

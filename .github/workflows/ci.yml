@@ -63,3 +63,34 @@ jobs:
           path: |
             dotnet/artifacts/*.nupkg
             dotnet/artifacts/*.snupkg
+
+  rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: rust
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: rust
+
+      - name: Check that the bundled grammars match the .NET package's
+        run: diff -r etalii-lark/grammars ../dotnet/src/EtAlii.Lark/Grammars
+
+      - name: Format
+        run: cargo fmt --all --check
+
+      - name: Clippy
+        run: cargo clippy --all-targets --locked -- -D warnings
+
+      - name: Test
+        run: cargo test --release --locked
+
+      - name: Package
+        run: cargo package --locked -p etalii-lark

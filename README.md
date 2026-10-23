@@ -8,7 +8,7 @@ turns a grammar into a type-safe parser.
 | Language | Package | Folder |
 |----------|---------|--------|
 | C# / .NET | [`EtAlii.Lark`](https://www.nuget.org/packages/EtAlii.Lark) on NuGet | [`dotnet/`](dotnet/README.md) |
-| Rust | `etalii-lark` on crates.io (in progress) | `rust/` |
+| Rust | [`etalii-lark`](https://crates.io/crates/etalii-lark) on crates.io | [`rust/`](rust/etalii-lark/README.md) |
 | TypeScript | `@etalii/lark` on npm (in progress) | `typescript/` |
 
 ## One interpretation of a grammar
