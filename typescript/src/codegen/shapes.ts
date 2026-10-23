@@ -52,6 +52,14 @@ export function computeShapes(rules: readonly Rule[], maybePlaceholders: boolean
   return result;
 }
 
+/**
+ * What a reference to each rule (other than `_rules`) can be as a child, by rule name (sorted): its trees, or for a
+ * `?rule`, also the children it inlines.
+ */
+export function referencesOf(lark: Lark): Map<string, string[]> {
+  return new Analyzer(lark.rules, lark.options.maybePlaceholders).references();
+}
+
 const RANK: Record<ElementKind, number> = { single: 0, optional: 1, repeated: 2 };
 
 interface Element {
@@ -216,6 +224,10 @@ class Analyzer {
       if (!origin.startsWith('_')) for (const r of rules) names.add(Analyzer.treeName(r));
     }
     return sorted(names);
+  }
+
+  references(): Map<string, string[]> {
+    return new Map(sorted(this.members.keys()).map((name) => [name, sorted(this.members.get(name)!)]));
   }
 
   /** What a reference to the rule can be as a child: its trees, or the children a `?rule` inlines. */

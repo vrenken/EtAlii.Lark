@@ -14,6 +14,8 @@ It covers:
 - Tree building: `?rule` and `_rule` inlining, `!rule` token keeping, aliases, `maybePlaceholders`, positions,
   priorities, and ambiguity handling (resolve or explicit `_ambig` trees).
 - Transformers and visitors.
+- A code generator, `npx etalii-lark generate`, that turns a grammar into a typed module: typed nodes, and a typed
+  visitor whose handlers get their children already converted to the result types you choose.
 - Error handling: Lark's `UnexpectedToken`, `UnexpectedCharacters` and `UnexpectedEOF` with their positions and
   expected terminals, `matchExamples`, error recovery, and the interactive LALR parser.
 
@@ -80,6 +82,87 @@ console.log(new Sum().transform(parser.parse('1,2,3'))); // 6
 Trees without a method are rebuilt with their transformed children (override `default` to change that), and a method
 can return `Discard` to remove the node. An error in a method is wrapped in a `VisitError`. A `Visitor` calls the
 method named after each subtree's rule, bottom-up with `visit` or top-down with `visitTopdown`.
+
+## Code generation
+
+`npx etalii-lark generate calc.lark --parser lalr` writes `calc.lark.ts`, a typed module for the grammar. It needs no
+configuration: you choose the result types of the visitor as an ordinary TypeScript type, and the compiler types every
+handler parameter from it.
+
+```lark
+// calc.lark
+?start: sum
+?sum: product | sum "+" product -> add
+?product: atom | product "*" atom -> mul
+?atom: NUMBER -> number | "(" sum ")"
+%import common.NUMBER
+%ignore " "
+```
+
+```ts
+import * as Calc from './calc.lark.js';
+
+type Results = { add: number; mul: number; number: number; NUMBER: number };
+
+const evaluate = Calc.visitor<Results>({
+  add: (node, sum, product) => sum + product, // sum: number, product: number
+  mul: (node, product, atom) => product * atom,
+  number: (node, number) => number,
+  NUMBER: (token) => Number(token.value),
+});
+
+const value = evaluate(Calc.parse('1 + 2 * (3 + 4)')); // value: number, 15
+```
+
+A handler that is missing, returns the wrong type, or has a key that isn't a rule, alias or terminal is a compile
+error. Run the generator in a `prebuild` script, or with `--watch` while you work on the grammar. `generate(text,
+options)` does the same from a script.
+
+The module contains:
+
+- **The parser:** `parse(text)`, plus `parseX(text)` for each start rule when there are several, and `lex`. They use
+  `parser()`, a `Lark` built on first use from `GRAMMAR` and `OPTIONS`. Grammars the grammar imports with relative
+  imports are embedded in it.
+- **Name constants:** `Rules.add`, `Terminals.NUMBER`, and so on.
+- **Node classes:** a class for each rule, alias and template that makes trees, such as `AddNode`, with the tree as
+  `node.tree` and a getter for each child.
+  - A child that is always a `line` tree is a `LineNode`, and a token is a `Token`. A child that can be several trees
+    or tokens is a union, which `switch (child.data)` narrows.
+  - `[item]` gives `T | null`, and `item*` and `item+` give an array, whose getter has a plural name (`lines`).
+  - Getters are named after the grammar (`text`, `text2`, `count`). Filtered tokens, such as anonymous strings and
+    `_TERMINALS`, aren't children, and `_rules` are inlined into their parent's getters.
+  - Trees whose alternatives have different children have no fixed shape. Their class has `children` instead.
+  - `AddNode.from(tree)` returns the node, or `null` when the tree isn't an `add` tree.
+- **The typed visitor:** `visitor<Results>(handlers)` returns a function that visits a tree bottom-up and returns its
+  value.
+  - `Results` maps the trees and terminals the visitor turns into values to their types.
+  - Each tree in it gets a handler `(node, ...children)`, whose children come as their result types. Children that
+    aren't mapped come as their node or token, so the visitor only visits what you map. A child that can be several
+    trees gets the union of their types.
+  - Each terminal in it gets a handler `(token)`.
+  - A tree without a fixed shape gets `(node)` only.
+  - The result is the type of the start rule's trees. A root that isn't mapped comes back as its node.
+  - The visitor doesn't recurse, so deep trees are fine. An error thrown by a handler stops it.
+- **Types:** `Nodes`, `Shapes`, `TreeName`, `TerminalName`, and `Handlers<Results>` and `Value<Results>` for handlers
+  written as a class: `class Evaluator implements Calc.Handlers<Results>`, with its parameters annotated, passed as
+  `Calc.visitor<Results>(new Evaluator())`.
+
+The node classes and visitor parameters come from the *shapes* of the trees: what can stand at each position among a
+tree's children. They are derived from the grammar as Lark compiles it, so they follow inlining, aliases, templates,
+imports, placeholders and repetitions exactly as the parser does. The Rust and .NET code generators work from the same
+shapes, and the conformance suite checks them against the trees Python Lark builds.
+[`examples/purchase-orders`](https://github.com/vrenken/EtAlii.Lark/tree/develop/typescript/examples/purchase-orders)
+builds a purchase order model from the grammar of the .NET documentation's typed visitor example.
+
+| Option | Values |
+|--------|--------|
+| `--out <file>` | Where to write the module. Defaults to the grammar's path with `.ts` added. |
+| `--parser` | `earley` (the default), `lalr`, `cyk` |
+| `--lexer` | `auto` (the default), `basic`, `contextual`, `dynamic`, `dynamic_complete` |
+| `--start <rule>` | The start rule, `start` by default. Repeat it for several start rules. |
+| `--no-maybe-placeholders`, `--keep-all-tokens` | The parser options of the same names. |
+| `--package <name>` | The module the generated code imports the package from, `@etalii/lark` by default. |
+| `--watch` | Generate again whenever the grammar, or a grammar it imports, changes. |
 
 ## Errors
 
