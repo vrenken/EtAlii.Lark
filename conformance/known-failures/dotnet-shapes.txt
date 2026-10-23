@@ -1,0 +1,419 @@
+# Conformance cases whose tree shapes the .NET source generator works out differently.
+#
+# The shapes in the cases come from conformance/tools/shapes.py, which works on Lark's compiled grammar and is checked
+# against the trees Lark builds. The .NET generator reads the grammar text instead, and is coarser on these cases.
+# None of its shapes contradicts a tree in the cases: it never mistypes a child, it only types fewer of them.
+codegen-0004  # .NET makes x~n..m one repeated element
+codegen-0005  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+codegen-0006  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+codegen-0007  # anonymous terminals have no name in .NET
+codegen-0008  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+codegen-0009  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+examples-0005  # anonymous terminals have no name in .NET
+examples-0010  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+examples-0015  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+examples-0016  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+examples-0017  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats); .NET does not resolve imported rules; .NET makes x~n..m one repeated element
+examples-0018  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats); .NET does not resolve imported rules; .NET makes x~n..m one repeated element
+examples-0019  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats); .NET does not resolve imported rules; .NET makes x~n..m one repeated element
+examples-0020  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats); .NET does not resolve imported rules; .NET makes x~n..m one repeated element
+examples-0021  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats); .NET does not resolve imported rules; .NET makes x~n..m one repeated element
+examples-0025  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates; .NET also lists rules Lark drops as unused; different element names for merged alternatives; .NET does not resolve imported rules; .NET members are a superset; .NET makes a child optional that is always present
+examples-0026  # .NET has no fixed shape (templates, recursive rules, nested repeats); different element names for merged alternatives; .NET does not resolve imported rules
+upstream-0001  # .NET has no fixed shape (templates, recursive rules, nested repeats); different element names for merged alternatives; .NET does not resolve imported rules
+upstream-0004  # anonymous terminals have no name in .NET
+upstream-0007  # anonymous terminals have no name in .NET
+upstream-0009  # anonymous terminals have no name in .NET
+upstream-0010  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0013  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0017  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0018  # anonymous terminals have no name in .NET
+upstream-0026  # anonymous terminals have no name in .NET
+upstream-0027  # anonymous terminals have no name in .NET
+upstream-0028  # anonymous terminals have no name in .NET
+upstream-0029  # anonymous terminals have no name in .NET
+upstream-0030  # anonymous terminals have no name in .NET
+upstream-0031  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0032  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0033  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0034  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0035  # anonymous terminals have no name in .NET
+upstream-0036  # anonymous terminals have no name in .NET
+upstream-0039  # different element names for merged alternatives
+upstream-0040  # anonymous terminals have no name in .NET
+upstream-0042  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0043  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0044  # anonymous terminals have no name in .NET
+upstream-0045  # anonymous terminals have no name in .NET
+upstream-0046  # anonymous terminals have no name in .NET
+upstream-0047  # anonymous terminals have no name in .NET
+upstream-0048  # anonymous terminals have no name in .NET
+upstream-0049  # anonymous terminals have no name in .NET
+upstream-0050  # anonymous terminals have no name in .NET
+upstream-0051  # anonymous terminals have no name in .NET
+upstream-0052  # anonymous terminals have no name in .NET
+upstream-0053  # anonymous terminals have no name in .NET
+upstream-0054  # anonymous terminals have no name in .NET
+upstream-0062  # anonymous terminals have no name in .NET
+upstream-0064  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0065  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0066  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0067  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0068  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0069  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0070  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0072  # anonymous terminals have no name in .NET
+upstream-0075  # anonymous terminals have no name in .NET
+upstream-0076  # anonymous terminals have no name in .NET
+upstream-0084  # anonymous terminals have no name in .NET
+upstream-0095  # anonymous terminals have no name in .NET
+upstream-0097  # anonymous terminals have no name in .NET
+upstream-0098  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0107  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0109  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0110  # anonymous terminals have no name in .NET
+upstream-0120  # anonymous terminals have no name in .NET
+upstream-0121  # anonymous terminals have no name in .NET
+upstream-0122  # anonymous terminals have no name in .NET
+upstream-0123  # anonymous terminals have no name in .NET
+upstream-0124  # anonymous terminals have no name in .NET
+upstream-0125  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0126  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0127  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0128  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0129  # anonymous terminals have no name in .NET
+upstream-0130  # anonymous terminals have no name in .NET
+upstream-0134  # anonymous terminals have no name in .NET
+upstream-0136  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0137  # anonymous terminals have no name in .NET
+upstream-0139  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0140  # anonymous terminals have no name in .NET
+upstream-0141  # anonymous terminals have no name in .NET
+upstream-0142  # anonymous terminals have no name in .NET
+upstream-0150  # different element names for merged alternatives
+upstream-0151  # anonymous terminals have no name in .NET
+upstream-0152  # anonymous terminals have no name in .NET
+upstream-0154  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0155  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0156  # anonymous terminals have no name in .NET
+upstream-0157  # anonymous terminals have no name in .NET
+upstream-0158  # anonymous terminals have no name in .NET
+upstream-0159  # anonymous terminals have no name in .NET
+upstream-0160  # anonymous terminals have no name in .NET
+upstream-0161  # anonymous terminals have no name in .NET
+upstream-0162  # anonymous terminals have no name in .NET
+upstream-0163  # anonymous terminals have no name in .NET
+upstream-0164  # anonymous terminals have no name in .NET
+upstream-0165  # anonymous terminals have no name in .NET
+upstream-0166  # anonymous terminals have no name in .NET
+upstream-0174  # anonymous terminals have no name in .NET
+upstream-0177  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0178  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0179  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0180  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0181  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0182  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0183  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0185  # anonymous terminals have no name in .NET
+upstream-0188  # anonymous terminals have no name in .NET
+upstream-0189  # anonymous terminals have no name in .NET
+upstream-0197  # anonymous terminals have no name in .NET
+upstream-0198  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0209  # anonymous terminals have no name in .NET
+upstream-0211  # anonymous terminals have no name in .NET
+upstream-0212  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0217  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0218  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0219  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0220  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0225  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0227  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0228  # anonymous terminals have no name in .NET
+upstream-0238  # anonymous terminals have no name in .NET
+upstream-0239  # anonymous terminals have no name in .NET
+upstream-0240  # anonymous terminals have no name in .NET
+upstream-0241  # anonymous terminals have no name in .NET
+upstream-0242  # anonymous terminals have no name in .NET
+upstream-0243  # anonymous terminals have no name in .NET
+upstream-0244  # anonymous terminals have no name in .NET
+upstream-0248  # anonymous terminals have no name in .NET
+upstream-0250  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0251  # anonymous terminals have no name in .NET
+upstream-0253  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0254  # anonymous terminals have no name in .NET
+upstream-0255  # anonymous terminals have no name in .NET
+upstream-0256  # anonymous terminals have no name in .NET
+upstream-0264  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0265  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0266  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0267  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0268  # different element names for merged alternatives
+upstream-0269  # anonymous terminals have no name in .NET
+upstream-0270  # anonymous terminals have no name in .NET
+upstream-0272  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0273  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0274  # anonymous terminals have no name in .NET
+upstream-0275  # anonymous terminals have no name in .NET
+upstream-0276  # anonymous terminals have no name in .NET
+upstream-0277  # anonymous terminals have no name in .NET
+upstream-0278  # anonymous terminals have no name in .NET
+upstream-0279  # anonymous terminals have no name in .NET
+upstream-0280  # anonymous terminals have no name in .NET
+upstream-0281  # anonymous terminals have no name in .NET
+upstream-0282  # anonymous terminals have no name in .NET
+upstream-0283  # anonymous terminals have no name in .NET
+upstream-0284  # anonymous terminals have no name in .NET
+upstream-0292  # anonymous terminals have no name in .NET
+upstream-0295  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0296  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0297  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0298  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0299  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0300  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0301  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0303  # anonymous terminals have no name in .NET
+upstream-0306  # anonymous terminals have no name in .NET
+upstream-0307  # anonymous terminals have no name in .NET
+upstream-0311  # anonymous terminals have no name in .NET
+upstream-0312  # anonymous terminals have no name in .NET
+upstream-0317  # anonymous terminals have no name in .NET
+upstream-0318  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0329  # anonymous terminals have no name in .NET
+upstream-0331  # anonymous terminals have no name in .NET
+upstream-0332  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0337  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0338  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0339  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0340  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0345  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0347  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0348  # anonymous terminals have no name in .NET
+upstream-0358  # anonymous terminals have no name in .NET
+upstream-0359  # anonymous terminals have no name in .NET
+upstream-0360  # anonymous terminals have no name in .NET
+upstream-0361  # anonymous terminals have no name in .NET
+upstream-0362  # anonymous terminals have no name in .NET
+upstream-0363  # anonymous terminals have no name in .NET
+upstream-0364  # anonymous terminals have no name in .NET
+upstream-0368  # anonymous terminals have no name in .NET
+upstream-0370  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0371  # anonymous terminals have no name in .NET
+upstream-0373  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0374  # anonymous terminals have no name in .NET
+upstream-0375  # anonymous terminals have no name in .NET
+upstream-0376  # anonymous terminals have no name in .NET
+upstream-0384  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0385  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0386  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0387  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0388  # different element names for merged alternatives
+upstream-0389  # anonymous terminals have no name in .NET
+upstream-0390  # anonymous terminals have no name in .NET
+upstream-0392  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0393  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0394  # anonymous terminals have no name in .NET
+upstream-0395  # anonymous terminals have no name in .NET
+upstream-0396  # anonymous terminals have no name in .NET
+upstream-0397  # anonymous terminals have no name in .NET
+upstream-0398  # anonymous terminals have no name in .NET
+upstream-0399  # anonymous terminals have no name in .NET
+upstream-0400  # anonymous terminals have no name in .NET
+upstream-0401  # anonymous terminals have no name in .NET
+upstream-0402  # anonymous terminals have no name in .NET
+upstream-0403  # anonymous terminals have no name in .NET
+upstream-0404  # anonymous terminals have no name in .NET
+upstream-0412  # anonymous terminals have no name in .NET
+upstream-0415  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0416  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0417  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0418  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0419  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0420  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0421  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0423  # anonymous terminals have no name in .NET
+upstream-0426  # anonymous terminals have no name in .NET
+upstream-0427  # anonymous terminals have no name in .NET
+upstream-0431  # anonymous terminals have no name in .NET
+upstream-0432  # anonymous terminals have no name in .NET
+upstream-0437  # anonymous terminals have no name in .NET
+upstream-0438  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0448  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0449  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0450  # anonymous terminals have no name in .NET
+upstream-0451  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0452  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0454  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0457  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0460  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0461  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0464  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0466  # anonymous terminals have no name in .NET
+upstream-0467  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0468  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0471  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0472  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0473  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0476  # anonymous terminals have no name in .NET
+upstream-0477  # different element names for merged alternatives
+upstream-0479  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0480  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0481  # anonymous terminals have no name in .NET
+upstream-0482  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0483  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0485  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0488  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0491  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0492  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0496  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0498  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0499  # anonymous terminals have no name in .NET
+upstream-0501  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0502  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0505  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0506  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0507  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0509  # anonymous terminals have no name in .NET
+upstream-0510  # different element names for merged alternatives
+upstream-0512  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0513  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0514  # anonymous terminals have no name in .NET
+upstream-0515  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0516  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0518  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0521  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0524  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0525  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0529  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0532  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0533  # anonymous terminals have no name in .NET
+upstream-0536  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0537  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0540  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0541  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0542  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0578  # anonymous terminals have no name in .NET
+upstream-0579  # anonymous terminals have no name in .NET
+upstream-0590  # anonymous terminals have no name in .NET
+upstream-0592  # anonymous terminals have no name in .NET
+upstream-0593  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0596  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0603  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0605  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0606  # anonymous terminals have no name in .NET
+upstream-0616  # anonymous terminals have no name in .NET
+upstream-0617  # anonymous terminals have no name in .NET
+upstream-0618  # anonymous terminals have no name in .NET
+upstream-0619  # anonymous terminals have no name in .NET
+upstream-0620  # anonymous terminals have no name in .NET
+upstream-0621  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0622  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0623  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0624  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0625  # anonymous terminals have no name in .NET
+upstream-0626  # anonymous terminals have no name in .NET
+upstream-0630  # anonymous terminals have no name in .NET
+upstream-0632  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0633  # anonymous terminals have no name in .NET
+upstream-0635  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0636  # anonymous terminals have no name in .NET
+upstream-0637  # anonymous terminals have no name in .NET
+upstream-0638  # anonymous terminals have no name in .NET
+upstream-0646  # different element names for merged alternatives
+upstream-0647  # anonymous terminals have no name in .NET
+upstream-0648  # anonymous terminals have no name in .NET
+upstream-0650  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0651  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0652  # anonymous terminals have no name in .NET
+upstream-0653  # anonymous terminals have no name in .NET
+upstream-0654  # anonymous terminals have no name in .NET
+upstream-0655  # anonymous terminals have no name in .NET
+upstream-0656  # anonymous terminals have no name in .NET
+upstream-0657  # anonymous terminals have no name in .NET
+upstream-0658  # anonymous terminals have no name in .NET
+upstream-0659  # anonymous terminals have no name in .NET
+upstream-0660  # anonymous terminals have no name in .NET
+upstream-0661  # anonymous terminals have no name in .NET
+upstream-0662  # anonymous terminals have no name in .NET
+upstream-0670  # anonymous terminals have no name in .NET
+upstream-0675  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0676  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0677  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0678  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0679  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0680  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0681  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0683  # anonymous terminals have no name in .NET
+upstream-0686  # anonymous terminals have no name in .NET
+upstream-0687  # anonymous terminals have no name in .NET
+upstream-0695  # anonymous terminals have no name in .NET
+upstream-0696  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0707  # anonymous terminals have no name in .NET
+upstream-0709  # anonymous terminals have no name in .NET
+upstream-0710  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0713  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0720  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0722  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0723  # anonymous terminals have no name in .NET
+upstream-0733  # anonymous terminals have no name in .NET
+upstream-0734  # anonymous terminals have no name in .NET
+upstream-0735  # anonymous terminals have no name in .NET
+upstream-0736  # anonymous terminals have no name in .NET
+upstream-0737  # anonymous terminals have no name in .NET
+upstream-0738  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0739  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0740  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0741  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0742  # anonymous terminals have no name in .NET
+upstream-0743  # anonymous terminals have no name in .NET
+upstream-0747  # anonymous terminals have no name in .NET
+upstream-0749  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0750  # anonymous terminals have no name in .NET
+upstream-0752  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0753  # anonymous terminals have no name in .NET
+upstream-0754  # anonymous terminals have no name in .NET
+upstream-0755  # anonymous terminals have no name in .NET
+upstream-0763  # different element names for merged alternatives
+upstream-0764  # anonymous terminals have no name in .NET
+upstream-0765  # anonymous terminals have no name in .NET
+upstream-0767  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0768  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0769  # anonymous terminals have no name in .NET
+upstream-0770  # anonymous terminals have no name in .NET
+upstream-0771  # anonymous terminals have no name in .NET
+upstream-0772  # anonymous terminals have no name in .NET
+upstream-0773  # anonymous terminals have no name in .NET
+upstream-0774  # anonymous terminals have no name in .NET
+upstream-0775  # anonymous terminals have no name in .NET
+upstream-0776  # anonymous terminals have no name in .NET
+upstream-0777  # anonymous terminals have no name in .NET
+upstream-0778  # anonymous terminals have no name in .NET
+upstream-0779  # anonymous terminals have no name in .NET
+upstream-0787  # anonymous terminals have no name in .NET
+upstream-0792  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0793  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0794  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0795  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0796  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0797  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0798  # .NET has no fixed shape (templates, recursive rules, nested repeats); .NET has no nodes for templates
+upstream-0800  # anonymous terminals have no name in .NET
+upstream-0803  # anonymous terminals have no name in .NET
+upstream-0804  # anonymous terminals have no name in .NET
+upstream-0808  # anonymous terminals have no name in .NET
+upstream-0809  # anonymous terminals have no name in .NET
+upstream-0814  # anonymous terminals have no name in .NET
+upstream-0815  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0825  # .NET also lists rules Lark drops as unused
+upstream-0835  # anonymous terminals have no name in .NET
+upstream-0836  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0837  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0838  # anonymous terminals have no name in .NET
+upstream-0841  # different element names for merged alternatives; .NET makes a child optional that is always present
+upstream-0842  # .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0843  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0844  # anonymous terminals have no name in .NET; different element names for merged alternatives
+upstream-0845  # different element names for merged alternatives
+upstream-0847  # anonymous terminals have no name in .NET; different element names for merged alternatives
+upstream-0848  # anonymous terminals have no name in .NET; different element names for merged alternatives
+upstream-0849  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)
+upstream-0850  # anonymous terminals have no name in .NET; .NET has no fixed shape (templates, recursive rules, nested repeats)

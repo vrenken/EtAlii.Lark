@@ -14,6 +14,7 @@ import {
   LarkOptions,
   Meta,
   Node,
+  shapesOf,
   Token,
   Tree,
   UnexpectedCharacters,
@@ -96,6 +97,10 @@ function runCase(c: JsonObject): string[] {
     return failures;
   }
   if (grammarError !== undefined) return [`Expected grammar error ${grammarError}, but the grammar loaded.`];
+  if (c.shapes !== undefined) {
+    const actual = Object.fromEntries(shapesOf(parser)) as unknown as Json;
+    if (!isDeepStrictEqual(c.shapes, actual)) failures.push(`Shapes:\n  expected ${JSON.stringify(c.shapes)}\n  actual   ${JSON.stringify(actual)}`);
+  }
 
   for (const t of c.tests as JsonObject[]) {
     const isLex = t.lex !== undefined;

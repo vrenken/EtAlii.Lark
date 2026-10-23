@@ -6,6 +6,7 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
+use etalii_lark::codegen::{Shape, Shapes};
 use etalii_lark::{Ambiguity, Error, Indenter, Lark, LarkOptions, LexerKind, Node, ParserKind, PriorityMode, Token, Tree};
 use serde_json::{json, Map, Value};
 
@@ -97,6 +98,12 @@ fn run_case(c: &Value) -> Vec<String> {
         failures.push(format!("Expected grammar error {expected}, but the grammar loaded."));
         return failures;
     }
+    if let Some(expected) = c.get("shapes") {
+        let actual = shapes_json(&Shapes::of(&parser));
+        if *expected != actual {
+            failures.push(format!("Shapes:\n  expected {expected}\n  actual   {actual}"));
+        }
+    }
 
     for test in c["tests"].as_array().unwrap() {
         let expect = &test["expect"];
@@ -183,6 +190,34 @@ fn options(options: &Map<String, Value>) -> etalii_lark::Result<LarkOptions> {
         }
     }
     Ok(result)
+}
+
+fn shapes_json(shapes: &Shapes) -> Value {
+    let mut result = Map::new();
+    for (name, shape) in &shapes.trees {
+        let value = match shape {
+            Shape::Variable => Value::Null,
+            Shape::Inlined => json!("inlined"),
+            Shape::Fixed(elements) => Value::Array(
+                elements
+                    .iter()
+                    .map(|e| {
+                        let mut element = json!({
+                            "kind": e.kind.as_str(),
+                            "name": e.name,
+                            "members": e.members.iter().map(|m| m.as_str()).collect::<Vec<_>>(),
+                        });
+                        if let Some(slot) = &e.slot {
+                            element["slot"] = json!(slot);
+                        }
+                        element
+                    })
+                    .collect(),
+            ),
+        };
+        result.insert(name.clone(), value);
+    }
+    Value::Object(result)
 }
 
 fn sorted<'a>(values: impl IntoIterator<Item = &'a String>) -> Value {

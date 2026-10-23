@@ -1,6 +1,8 @@
 // A port of the Lark parsing toolkit to TypeScript. Grammars are written in Lark's grammar syntax, and are
 // interpreted exactly as Lark 1.3.1 does: the trees, the token types and positions, and the errors are the same.
 
+export { ANY, computeShapes, PLACEHOLDER, shapesOf } from './codegen/shapes.js';
+export type { ElementKind, Shape, ShapeElement } from './codegen/shapes.js';
 export {
   ConfigurationError,
   DedentError,
