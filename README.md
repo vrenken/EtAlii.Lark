@@ -9,7 +9,7 @@ turns a grammar into a type-safe parser.
 |----------|---------|--------|
 | C# / .NET | [`EtAlii.Lark`](https://www.nuget.org/packages/EtAlii.Lark) on NuGet | [`dotnet/`](dotnet/README.md) |
 | Rust | [`etalii-lark`](https://crates.io/crates/etalii-lark) on crates.io | [`rust/`](rust/etalii-lark/README.md) |
-| TypeScript | `@etalii/lark` on npm (in progress) | `typescript/` |
+| TypeScript | [`@etalii/lark`](https://www.npmjs.com/package/@etalii/lark) on npm | [`typescript/`](typescript/README.md) |
 
 ## One interpretation of a grammar
 
