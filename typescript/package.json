@@ -1,0 +1,52 @@
+{
+  "name": "@etalii/lark",
+  "version": "0.1.0",
+  "description": "A port of the Lark parsing toolkit to TypeScript: Lark EBNF grammars, Earley/LALR(1)/CYK parsers, basic/contextual/dynamic lexers, tree building, transformers and visitors.",
+  "keywords": [
+    "lark",
+    "parser",
+    "grammar",
+    "earley",
+    "lalr",
+    "ebnf"
+  ],
+  "license": "MIT",
+  "author": "Peter Vrenken",
+  "homepage": "https://github.com/vrenken/EtAlii.Lark",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vrenken/EtAlii.Lark.git",
+    "directory": "typescript"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "THIRD-PARTY-NOTICES.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "embed-grammars": "node scripts/embed-grammars.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "prepack": "node scripts/copy-notices.mjs && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}

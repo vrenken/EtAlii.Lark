@@ -429,3 +429,8 @@ FodyWeavers.xsd
 
 # Rust build output
 rust/target/
+
+# TypeScript build output, and the notices copied into the package when packing
+typescript/dist/
+typescript/LICENSE
+typescript/THIRD-PARTY-NOTICES.md

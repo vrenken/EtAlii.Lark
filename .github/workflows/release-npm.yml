@@ -1,0 +1,80 @@
+name: Release (npm)
+
+# Publishes the @etalii/lark package to npm, with the same version tags as the NuGet and crates.io releases, for
+# example:
+#   git tag v0.1.0 && git push origin v0.1.0
+# It can also be started by hand (Actions > Release (npm) > Run workflow) with a version.
+#
+# Nothing is published until the repository variable PUBLISH_NPM is set to "true". Credentials:
+# - The @etalii scope must exist on npm (an npm organization or user named etalii) and allow publishing.
+# - The first release needs an npm access token (granular, with read and write access to the @etalii scope) in the
+#   NPM_TOKEN secret, because npm trusted publishing can only be configured for a package that exists.
+# - After that, configure a trusted publisher on npmjs.com (package settings > Trusted Publisher: GitHub Actions, this
+#   repository, workflow release-npm.yml, environment npm) and delete the secret; the workflow then uses GitHub OIDC.
+# Either way the package is published with provenance.
+
+on:
+  push:
+    tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish, without the leading v (for example 0.1.0 or 0.2.0-preview.1)'
+        required: true
+
+permissions:
+  contents: read
+  id-token: write   # npm trusted publishing and provenance (OIDC)
+
+jobs:
+  publish:
+    if: ${{ vars.PUBLISH_NPM == 'true' }}
+    runs-on: ubuntu-latest
+    environment: npm
+    defaults:
+      run:
+        working-directory: typescript
+    steps:
+      - uses: actions/checkout@v4
+
+      # Trusted publishing needs npm 11.5.1 or later, which comes with Node.js 24.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Determine version
+        id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            version="${INPUT_VERSION#v}"
+          else
+            version="${GITHUB_REF_NAME#v}"
+          fi
+          if ! [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "'$version' is not a valid version (expected MAJOR.MINOR.PATCH[-suffix])." >&2
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          # Prereleases go to the "next" dist-tag, so they don't become the default install.
+          if [[ "$version" == *-* ]]; then echo "tag=next" >> "$GITHUB_OUTPUT"; else echo "tag=latest" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Install
+        run: npm ci
+
+      - name: Set the version
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: npm version "$VERSION" --no-git-tag-version --allow-same-version
+
+      - name: Test
+        run: npm test
+
+      - name: Publish
+        env:
+          # Empty when trusted publishing is configured; npm then authenticates with GitHub OIDC.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: npm publish --provenance --access public --tag "$TAG"
