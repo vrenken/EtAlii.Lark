@@ -8,7 +8,7 @@ turns a grammar into a type-safe parser.
 | Language | Package | Folder |
 |----------|---------|--------|
 | C# / .NET | [`EtAlii.Lark`](https://www.nuget.org/packages/EtAlii.Lark) on NuGet | [`dotnet/`](dotnet/README.md) |
-| Rust | [`etalii-lark`](https://crates.io/crates/etalii-lark) on crates.io | [`rust/`](rust/etalii-lark/README.md) |
+| Rust | [`etalii-lark`](https://crates.io/crates/etalii-lark) and [`etalii-lark-derive`](https://crates.io/crates/etalii-lark-derive) on crates.io | [`rust/`](rust/etalii-lark/README.md) |
 | TypeScript | [`@etalii/lark`](https://www.npmjs.com/package/@etalii/lark) on npm | [`typescript/`](typescript/README.md) |
 
 ## One interpretation of a grammar
@@ -18,6 +18,9 @@ errors. The [conformance suite](conformance/README.md) makes sure of that. It ho
 Python Lark gives for them, as language-neutral data: the cases of Lark's own test suite, extracted automatically, and
 cases for Lark's example grammars and its Python and Lark grammars. Every package runs all of them in CI, and CI checks
 that the expected results are exactly what Lark 1.3.1 produces.
+
+The code generators share that interpretation too. The typed nodes and visitor parameters they generate come from the
+*shapes* of the trees, which the suite defines on Lark's compiled grammar and checks against the trees Lark builds.
 
 ## License
 

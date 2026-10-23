@@ -98,6 +98,32 @@ fn main() -> Result<(), etalii_lark::Error> {
 
 A `Visitor` is called for each subtree, bottom-up (`visit_all`) or top-down (`visit_topdown`).
 
+## Typed code generation
+
+The [`etalii-lark-derive`](https://crates.io/crates/etalii-lark-derive) crate generates a typed API for a grammar at
+compile time: a parser, a wrapper for each kind of tree with an accessor for each child, and a typed visitor whose
+methods get their children already converted to the result types you map.
+
+```rust,ignore
+use etalii_lark_derive::{lark_grammar, lark_result};
+
+#[lark_grammar(file = "src/calc.lark", parser = "lalr")]
+#[lark_result(f64, "add", "mul", "number")]
+pub mod calc {}
+
+impl calc::Visitor for Evaluator {
+    type Error = std::num::ParseFloatError;
+    fn visit_add(&mut self, _: calc::AddNode<'_>, sum: f64, product: f64) -> Result<f64, Self::Error> {
+        Ok(sum + product)
+    }
+    // ...
+}
+
+let value = Evaluator.visit_start(&calc::parse("1 + 2 * 3")?)?;
+```
+
+See its README for the details. `etalii_lark::codegen::Generator` generates the same code from a build script.
+
 ## Errors
 
 ```rust

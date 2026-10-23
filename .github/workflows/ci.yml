@@ -92,8 +92,11 @@ jobs:
       - name: Test
         run: cargo test --release --locked
 
+      - name: Run the purchase order example
+        run: cargo run --release --locked --example purchase_orders -p etalii-lark-derive
+
       - name: Package
-        run: cargo package --locked -p etalii-lark
+        run: cargo package --locked --workspace --exclude codegen-tests
 
   typescript:
     runs-on: ubuntu-latest
