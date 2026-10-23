@@ -1,0 +1,170 @@
+{
+ "cases": [
+  {
+   "grammar_file": "../dotnet/docs/examples/PurchaseOrders/purchase-order.lark",
+   "options": {
+    "parser": "lalr",
+    "start": "order"
+   },
+   "inputs": [
+    {
+     "input": "order \"PO-2026-0142\"\ncustomer \"ACME Corp\" (gold)\ncurrency EUR\nline \"LT-14\" \"Laptop 14 inch\" qty 5 at 1299.00\nline \"DS-02\" \"Docking station\" qty 5 at 189.50 discount 10%\nship express to \"Keizersgracht 1\" \"1015 CS Amsterdam\" \"NL\"\nrule when order.total > 5000.00 and customer.tier = gold then discount 5%\nrule when line.quantity >= 50 or (order.total >= 20000.00) then require approval by \"finance\"\n"
+    },
+    {
+     "input": "order \"PO-1\" customer \"B\" currency USD line \"A\" \"B\" qty 1 at 1.00"
+    },
+    {
+     "input": "order \"PO-2\" customer \"B\" currency GBP line \"A\" \"B\" qty 1 at 1.00 pickup at \"Desk\" rule when (customer.tier = silver) then free shipping"
+    }
+   ]
+  },
+  {
+   "grammar": "?start: sum\n?sum: product | sum \"+\" product -> add | sum \"-\" product -> sub\n?product: atom | product \"*\" atom -> mul\n?atom: NUMBER -> number | \"-\" atom -> neg | \"(\" sum \")\"\n%import common.NUMBER\n%ignore \" \"\n",
+   "options": {
+    "parser": "lalr"
+   },
+   "inputs": [
+    {
+     "input": "1"
+    },
+    {
+     "input": "1 + 2 * 3"
+    },
+    {
+     "input": "-(1 - 2) * 3"
+    }
+   ]
+  },
+  {
+   "grammar": "start: pair+\n?pair: KEY | KEY \"=\" value\n?value: KEY | NUMBER | \"[\" [value (\",\" value)*] \"]\" -> list\nKEY: /[a-z]+/\n%import common.NUMBER\n%ignore \" \"\n",
+   "options": {
+    "parser": "lalr"
+   },
+   "inputs": [
+    {
+     "input": "a b=1 c=[1, d, [ ]]"
+    },
+    {
+     "input": "x=[]"
+    }
+   ]
+  },
+  {
+   "grammar": "start: _item+ _end\n_item: WORD | NUMBER\n_end: \".\" | \"!\" mark\nmark: \"!\"*\n%import common.WORD\n%import common.NUMBER\n%ignore \" \"\n",
+   "options": {
+    "parser": "earley"
+   },
+   "inputs": [
+    {
+     "input": "a 1 b ."
+    },
+    {
+     "input": "a !!!"
+    },
+    {
+     "input": "a !"
+    }
+   ]
+  },
+  {
+   "grammar": "start: \"a\" [b] c? d* e+ [f g] h~2 i~1..3\nb: \"b\"\nc: \"c\"\nd: \"d\"\ne: \"e\"\nf: \"f\"\ng: \"g\"\nh: \"h\"\ni: \"i\"\n%ignore \" \"\n",
+   "options": {
+    "parser": "lalr"
+   },
+   "inputs": [
+    {
+     "input": "a e h h i"
+    },
+    {
+     "input": "a b c d d e e f g h h i i i"
+    }
+   ]
+  },
+  {
+   "grammar": "start: \"a\" [b] c? d* e+ [f g] h~2 i~1..3\nb: \"b\"\nc: \"c\"\nd: \"d\"\ne: \"e\"\nf: \"f\"\ng: \"g\"\nh: \"h\"\ni: \"i\"\n%ignore \" \"\n",
+   "options": {
+    "parser": "lalr",
+    "maybe_placeholders": false
+   },
+   "inputs": [
+    {
+     "input": "a e h h i"
+    },
+    {
+     "input": "a b c d d e e f g h h i i i"
+    }
+   ]
+  },
+  {
+   "grammar": "!start: \"(\" item (\",\" item)* \")\" /;+/?\nitem: NAME | \"*\"\n%import common.CNAME -> NAME\n%ignore \" \"\n",
+   "options": {
+    "parser": "lalr"
+   },
+   "inputs": [
+    {
+     "input": "(a, *, b);;"
+    },
+    {
+     "input": "(a)"
+    }
+   ]
+  },
+  {
+   "grammar": "start: \"(\" item (\",\" item)* \")\"\nitem: NAME | \"*\"\n%import common.CNAME -> NAME\n%ignore \" \"\n",
+   "options": {
+    "parser": "lalr",
+    "keep_all_tokens": true
+   },
+   "inputs": [
+    {
+     "input": "(a, *, b)"
+    }
+   ]
+  },
+  {
+   "grammar": "start: list{NUMBER} _sep{WORD, \";\"}\nlist{x}: \"[\" [x (\",\" x)*] \"]\"\n_sep{x, s}: x (s x)*\n%import common.NUMBER\n%import common.WORD\n%ignore \" \"\n",
+   "options": {
+    "parser": "lalr"
+   },
+   "inputs": [
+    {
+     "input": "[1, 2] a; b; c"
+    },
+    {
+     "input": "[] a"
+    }
+   ]
+  },
+  {
+   "grammar": "start: stmt+\nstmt: \"let\" NAME \"=\" expr \";\" | \"print\" expr \";\" | expr \";\"\nexpr: NAME | NUMBER | NAME \"(\" [expr (\",\" expr)*] \")\"\n%import common.CNAME -> NAME\n%import common.NUMBER\n%ignore \" \"\n",
+   "options": {
+    "parser": "lalr"
+   },
+   "inputs": [
+    {
+     "input": "let x = 1; print f(x, 2); g();"
+    }
+   ]
+  },
+  {
+   "grammar": "a: \"a\" b?\nb: \"b\" a?\n%ignore \" \"\n",
+   "options": {
+    "parser": "lalr",
+    "start": [
+     "a",
+     "b"
+    ]
+   },
+   "inputs": [
+    {
+     "input": "a b a",
+     "start": "a"
+    },
+    {
+     "input": "b a",
+     "start": "b"
+    }
+   ]
+  }
+ ]
+}

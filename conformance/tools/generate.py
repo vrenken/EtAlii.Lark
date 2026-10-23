@@ -16,6 +16,8 @@ import lark
 from lark import Lark, Tree, Token
 from lark import exceptions
 
+from shapes import ShapeAnalyzer, check_tree
+
 LARK_VERSION = '1.3.1'
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
 
@@ -115,6 +117,7 @@ def run_case(case):
         result['grammar_error'] = name
         return result
     result.pop('grammar_error', None)
+    shapes = ShapeAnalyzer(parser.rules, parser.options.maybe_placeholders).shapes_json()
 
     tests = []
     for entry in case['inputs']:
@@ -133,6 +136,14 @@ def run_case(case):
     if not tests:
         return None
     result['tests'] = tests
+    result['shapes'] = shapes
+    # The shapes must describe the trees Lark really builds (explicit ambiguity adds _ambig trees, which they don't).
+    if case['options'].get('ambiguity') != 'explicit':
+        problems = []
+        for test in tests:
+            check_tree(shapes, test['expect'].get('tree'), problems)
+        if problems:
+            raise AssertionError('The shapes of %r don\'t match its trees:\n%s' % (result['grammar'], '\n'.join(problems)))
     return result
 
 

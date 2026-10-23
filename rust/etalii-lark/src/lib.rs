@@ -12,6 +12,7 @@
     clippy::needless_range_loop
 )]
 
+pub mod codegen;
 mod collisions;
 pub mod error;
 pub mod grammar;
