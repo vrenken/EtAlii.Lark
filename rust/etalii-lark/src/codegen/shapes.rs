@@ -105,6 +105,9 @@ pub enum Shape {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Shapes {
     pub trees: BTreeMap<String, Shape>,
+    /// What a reference to each rule (other than `_rules`) can be as a child: its trees, or for a `?rule`, also the
+    /// children it inlines.
+    pub references: BTreeMap<String, Vec<Member>>,
 }
 
 impl Shapes {
@@ -129,7 +132,12 @@ impl Shapes {
             };
             trees.insert(name, shape);
         }
-        Shapes { trees }
+        let references = analyzer
+            .members
+            .iter()
+            .map(|(name, members)| (name.to_string(), members.iter().cloned().collect()))
+            .collect();
+        Shapes { trees, references }
     }
 }
 

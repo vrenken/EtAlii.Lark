@@ -1,0 +1,25 @@
+[package]
+name = "etalii-lark-derive"
+description = "The #[lark_grammar] macro of etalii-lark: a typed parser, node wrappers and a typed visitor for a Lark grammar, generated at compile time."
+keywords = ["lark", "parser", "grammar", "codegen", "macro"]
+categories = ["parsing", "parser-implementations"]
+readme = "README.md"
+include = ["src/**/*.rs", "README.md", "LICENSE"]
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+etalii-lark.workspace = true
+proc-macro2 = "1"
+quote = "1"
+syn = { version = "2", features = ["full"] }
+
+[dev-dependencies]
+etalii-lark.workspace = true

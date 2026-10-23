@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["etalii-lark"]
+members = ["etalii-lark", "etalii-lark-derive", "codegen-tests"]
 
 [workspace.package]
 version = "0.1.0"
@@ -9,3 +9,7 @@ license = "MIT"
 authors = ["Peter Vrenken"]
 repository = "https://github.com/vrenken/EtAlii.Lark"
 homepage = "https://github.com/vrenken/EtAlii.Lark"
+
+[workspace.dependencies]
+# The release workflow sets this version together with the package version.
+etalii-lark = { path = "etalii-lark", version = "0.1.0" }

@@ -1,14 +1,14 @@
 name: Release (crates.io)
 
-# Publishes the etalii-lark crate to crates.io, with the same version tags as the NuGet release, for example:
+# Publishes the etalii-lark and etalii-lark-derive crates to crates.io, with the same version tags as the NuGet release, for example:
 #   git tag v0.1.0 && git push origin v0.1.0
 # It can also be started by hand (Actions > Release (crates.io) > Run workflow) with a version.
 #
 # Nothing is published until the repository variable PUBLISH_CRATES is set to "true". Credentials:
-# - The first release needs a crates.io API token (with the publish-new scope) in the CARGO_REGISTRY_TOKEN secret,
-#   because crates.io trusted publishing can only be configured for a crate that exists.
-# - After that, configure trusted publishing on crates.io (crate settings > Trusted Publishing: this repository,
-#   workflow release-rust.yml, environment crates-io) and delete the secret; the workflow then uses GitHub OIDC.
+# - The first release of each crate needs a crates.io API token (with the publish-new scope) in the
+#   CARGO_REGISTRY_TOKEN secret, because crates.io trusted publishing can only be configured for a crate that exists.
+# - After that, configure trusted publishing on crates.io for both crates (crate settings > Trusted Publishing: this
+#   repository, workflow release-rust.yml, environment crates-io) and delete the secret; the workflow then uses OIDC.
 
 on:
   push:
@@ -57,6 +57,8 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           sed -i "0,/^version = \".*\"/s//version = \"$VERSION\"/" Cargo.toml
+          sed -i "s/^\(etalii-lark = { path = \"etalii-lark\", version = \"\)[^\"]*\"/\1$VERSION\"/" Cargo.toml
+          grep -q "version = \"$VERSION\" }" Cargo.toml
           cargo update --workspace
 
       - name: Test
@@ -77,4 +79,5 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN || steps.auth.outputs.token }}
         # --allow-dirty: the version was just set from the tag.
-        run: cargo publish --locked --allow-dirty -p etalii-lark
+        # etalii-lark-derive depends on etalii-lark of the same version; cargo publishes them in that order.
+        run: cargo publish --locked --allow-dirty -p etalii-lark -p etalii-lark-derive
