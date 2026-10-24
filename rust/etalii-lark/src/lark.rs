@@ -16,6 +16,7 @@ use crate::parsers::cyk::CykParser;
 use crate::parsers::earley::{EarleyInput, EarleyParser};
 use crate::parsers::grammar_analysis::GrammarAnalyzer;
 use crate::parsers::lalr_analysis::compute_lalr;
+use crate::parsers::lalr_analysis::ParseTable;
 use crate::parsers::lalr_parser::{parse_with_recovery, InteractiveParser, LalrParser};
 use crate::pyre::Flags;
 use crate::token::Token;
@@ -475,6 +476,15 @@ impl Lark {
         match &self.parser {
             ParserImpl::Lalr(p) => Ok(InteractiveParser::new(p, p.new_state(start)?, self.thread(text))),
             _ => Err(Error::config("parse_interactive() currently only works with the LALR parser")),
+        }
+    }
+
+    /// The LALR(1) parse table, for a LALR parser (Lark's `parser.parser.parser.parse_table`): for each state, the
+    /// action on each terminal and the goto on each rule, with the start and end state of each start rule.
+    pub fn parse_table(&self) -> Option<&ParseTable> {
+        match &self.parser {
+            ParserImpl::Lalr(p) => Some(&p.table),
+            _ => None,
         }
     }
 

@@ -42,6 +42,31 @@ impl ParserState {
         self.state_stack.len()
     }
 
+    /// The stack of states, the start state first (Lark's `ParserState.state_stack`).
+    pub fn state_stack(&self) -> &[usize] {
+        &self.state_stack
+    }
+
+    /// The stack of values: the tokens shifted and the trees reduced, one per state above the start state (Lark's
+    /// `ParserState.value_stack`).
+    pub fn value_stack(&self) -> &[Node] {
+        &self.value_stack
+    }
+
+    /// Pops the stacks until `depth` states are left, at least the start state, and returns the values popped, the
+    /// lowest first: what error recovery does to resume at a state lower on the stack, as Lark's `on_error` handlers
+    /// do through `state_stack` and `value_stack`.
+    pub fn truncate(&mut self, depth: usize) -> Vec<Node> {
+        let depth = depth.max(1).min(self.state_stack.len());
+        self.state_stack.truncate(depth);
+        let values = depth - 1;
+        if values < self.value_stack.len() {
+            self.value_stack.split_off(values)
+        } else {
+            Vec::new()
+        }
+    }
+
     pub(crate) fn error_state(&self) -> ErrorState {
         ErrorState::Lalr {
             depth: self.depth(),
@@ -292,6 +317,19 @@ impl<'a> InteractiveParser<'a> {
     /// The parser state.
     pub fn parser_state(&self) -> &ParserState {
         &self.state
+    }
+
+    /// The parser state, to change for error recovery.
+    pub fn parser_state_mut(&mut self) -> &mut ParserState {
+        &mut self.state
+    }
+
+    /// Lexes the next token for the parser's current state, without feeding it; none at the end of the text. With
+    /// the contextual lexer, only the terminals the state accepts are matched, as when the parser lexes.
+    pub fn next_token(&mut self) -> Result<Option<Token>> {
+        let shared: SharedParserState = Rc::new(Cell::new((self.state.depth(), self.state.position())));
+        let mut stream = self.lexer.lex(Some(shared));
+        stream.next().transpose()
     }
 
     /// The byte offset the lexer is at.
