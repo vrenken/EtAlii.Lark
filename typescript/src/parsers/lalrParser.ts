@@ -42,6 +42,18 @@ export class ParserState {
   copy(): ParserState {
     return new ParserState([...this.stateStack], [...this.valueStack], this.endState);
   }
+
+  /**
+   * Pops the stacks until `depth` states are left, at least the start state, and returns the values popped, the lowest
+   * first: what error recovery does to resume at a state lower on the stack, as Lark's `on_error` handlers do through
+   * `state_stack` and `value_stack`.
+   */
+  truncate(depth: number): Node[] {
+    const keep = Math.min(Math.max(depth, 1), this.stateStack.length);
+    this.stateStack.length = keep;
+    const values = keep - 1;
+    return values < this.valueStack.length ? this.valueStack.splice(values) : [];
+  }
 }
 
 function endToken(last: Token | undefined): Token {
@@ -188,6 +200,16 @@ export class InteractiveParser {
       this.feedToken(r.value);
     }
     return tokens;
+  }
+
+  /**
+   * Lexes the next token for the parser's current state, without feeding it; `undefined` at the end of the text. With
+   * the contextual lexer, only the terminals the state accepts are matched, as when the parser lexes.
+   */
+  nextToken(): Token | undefined {
+    const shared: SharedParserState = { depth: this.parserState.depth, position: this.parserState.position };
+    const r = this.lexerThread.lex(shared).next();
+    return r.done ? undefined : r.value;
   }
 
   /** Feeds the end token, with the position of `lastToken` if given. */

@@ -31,6 +31,7 @@ export { Pattern, TerminalDef } from './lexer.js';
 export type { CustomLexer, PostLex, TokenCallback } from './lexer.js';
 export { FileSystemLoader, Grammar, GrammarImportError, MemoryLoader, StandardLibraryLoader } from './loadGrammar.js';
 export type { GrammarLoader } from './loadGrammar.js';
+export type { Action as LalrAction, ParseTable } from './parsers/lalrAnalysis.js';
 export { InteractiveParser, ParserState } from './parsers/lalrParser.js';
 export { Token } from './token.js';
 export { Meta, Tree } from './tree.js';

@@ -304,6 +304,14 @@ export class Lark {
     return new InteractiveParser(p, p.newState(s), this.thread(text));
   }
 
+  /**
+   * The LALR(1) parse table, for a LALR parser (Lark's `parser.parser.parser.parse_table`): for each state, the action
+   * on each terminal and the goto on each rule, with the start and end state of each start rule.
+   */
+  parseTable(): ParseTable | undefined {
+    return this.parser.kind === 'lalr' ? this.parser.parser.table : undefined;
+  }
+
   /** Only lexes the text, with the basic lexer (and the post-lexer). With `dontIgnore`, the ignored tokens are returned too. */
   *lex(text: string, dontIgnore = false): Generator<Token> {
     const conf = this.lexerConf.copy();
