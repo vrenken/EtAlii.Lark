@@ -10,7 +10,7 @@ use indexmap::IndexMap;
 
 use crate::error::{Error, ErrorState, Result, TerminalsByName, UnexpectedCharacters, UnexpectedToken};
 use crate::grammar::TOKEN_DEFAULT_PRIORITY;
-use crate::pyre::{self, Flags, Regex};
+use crate::pyre::{self, Alternatives, Flags, Regex};
 use crate::token::Token;
 
 /// What a terminal matches: a literal string or a regular expression (Lark's `PatternStr` and `PatternRE`).
@@ -306,6 +306,10 @@ impl PartialEq for LexerState<'_> {
 pub(crate) struct Scanner {
     terminals: Vec<TerminalDef>,
     regexes: Vec<Regex>,
+    /// The terminals' regexes tried in their order, as one search.
+    alternatives: Alternatives,
+    /// The same, each matching a whole text, built when a callback first needs it.
+    full: OnceLock<Option<Alternatives>>,
     pub(crate) allowed_types: Vec<String>,
 }
 
@@ -315,31 +319,34 @@ impl Scanner {
         for t in &terminals {
             regexes.push(compile_terminal(t, flags)?);
         }
+        let alternatives = Alternatives::new(&regexes, false).map_err(|e| Error::Lex(e.0))?;
         let allowed_types = terminals.iter().map(|t| t.name.clone()).collect();
         Ok(Scanner {
             terminals,
             regexes,
+            alternatives,
+            full: OnceLock::new(),
             allowed_types,
         })
     }
 
-    /// The end of the match at `pos` and the index of the terminal that matched.
+    /// The end of the match at `pos` and the index of the terminal that matched: the first terminal, in order, that
+    /// matches there.
     fn match_at(&self, text: &str, pos: usize) -> Option<(usize, usize)> {
-        for (i, re) in self.regexes.iter().enumerate() {
-            if let Some(end) = re.match_at(text, pos) {
-                return Some((end, i));
-            }
-        }
-        None
+        self.alternatives.match_at(text, pos)
     }
 
+    /// The first terminal, in order, that matches the whole of `text`.
     fn full_match(&self, text: &str) -> Option<&str> {
-        for (i, re) in self.regexes.iter().enumerate() {
-            if re.full_match(text) {
-                return Some(&self.terminals[i].name);
-            }
+        let full = self.full.get_or_init(|| Alternatives::new(&self.regexes, true).ok());
+        match full {
+            Some(full) => full.match_at(text, 0).map(|(_, i)| self.terminals[i].name.as_str()),
+            None => self
+                .regexes
+                .iter()
+                .position(|re| re.full_match(text))
+                .map(|i| self.terminals[i].name.as_str()),
         }
-        None
     }
 }
 

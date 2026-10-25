@@ -18,19 +18,35 @@ struct ChildFilter {
 
 impl ChildFilter {
     fn apply(&self, children: Vec<Node>) -> Vec<Node> {
-        let mut children: Vec<Option<Node>> = children.into_iter().map(Some).collect();
-        let mut filtered = Vec::with_capacity(children.len());
+        // The children to include come in their order, so one pass takes them; the result is allocated once, at
+        // the size it will have.
+        let mut size = self.append_none;
         for &(i, to_expand, add_none) in &self.to_include {
-            filtered.extend(std::iter::repeat_n(Node::Missing, add_none));
-            let child = children[i].take().unwrap_or(Node::Missing);
-            if to_expand {
-                match child {
-                    Node::Tree(t) => filtered.extend(t.children),
-                    other => filtered.push(other),
-                }
-            } else {
-                filtered.push(child);
+            size += add_none
+                + match (children.get(i), to_expand) {
+                    (Some(Node::Tree(t)), true) => t.children.len(),
+                    _ => 1,
+                };
+        }
+        let mut filtered = Vec::with_capacity(size);
+        let mut include = self.to_include.iter().peekable();
+        for (i, child) in children.into_iter().enumerate() {
+            let Some(&&(index, to_expand, add_none)) = include.peek() else {
+                break;
+            };
+            if index != i {
+                continue;
             }
+            include.next();
+            filtered.extend(std::iter::repeat_n(Node::Missing, add_none));
+            match child {
+                Node::Tree(t) if to_expand => filtered.extend(t.children),
+                other => filtered.push(other),
+            }
+        }
+        for &(_, _, add_none) in include {
+            filtered.extend(std::iter::repeat_n(Node::Missing, add_none));
+            filtered.push(Node::Missing);
         }
         filtered.extend(std::iter::repeat_n(Node::Missing, self.append_none));
         filtered

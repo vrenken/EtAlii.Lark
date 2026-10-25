@@ -1062,6 +1062,80 @@ impl Engine {
     }
 }
 
+/// Several regexes tried at one position in their order, the first that matches winning: what a lexer does with its
+/// terminals, and what Python's `re` does with the alternatives of one pattern (Lark joins its terminals into such
+/// patterns). Each run of consecutive regexes that need no backtracking is one automaton over all of them, searched
+/// once, which finds the same match as trying them one by one, since leftmost-first semantics prefers the pattern
+/// that comes first; a regex that needs backtracking is tried on its own, in its place.
+#[derive(Debug, Clone)]
+pub(crate) struct Alternatives {
+    groups: Arc<[Group]>,
+}
+
+#[derive(Debug)]
+enum Group {
+    /// The regexes `first..` as the patterns of one automaton.
+    Automata {
+        regex: meta::Regex,
+        first: usize,
+    },
+    Single {
+        engine: Engine,
+        index: usize,
+    },
+}
+
+impl Alternatives {
+    /// The alternatives of `regexes`; with `full`, each must match up to the end of the text it is given.
+    pub(crate) fn new(regexes: &[Regex], full: bool) -> Result<Alternatives, RegexError> {
+        let end = if full { r"\z" } else { "" };
+        let mut groups = Vec::new();
+        let mut i = 0;
+        while i < regexes.len() {
+            if regexes[i].inner.backtracking {
+                groups.push(Group::Single {
+                    engine: Engine::build(&regexes[i].inner.translated, true, full)?,
+                    index: i,
+                });
+                i += 1;
+                continue;
+            }
+            let first = i;
+            let mut patterns = Vec::new();
+            while i < regexes.len() && !regexes[i].inner.backtracking {
+                patterns.push(format!("(?:{}){}", regexes[i].inner.translated, end));
+                i += 1;
+            }
+            let regex = meta::Regex::builder()
+                .configure(meta::Regex::config().match_kind(regex_automata::MatchKind::LeftmostFirst))
+                .build_many(&patterns)
+                .map_err(|e| RegexError(e.to_string()))?;
+            groups.push(Group::Automata { regex, first });
+        }
+        Ok(Alternatives { groups: groups.into() })
+    }
+
+    /// The end of the match at `pos` of the first regex that matches there, and its index.
+    pub(crate) fn match_at(&self, text: &str, pos: usize) -> Option<(usize, usize)> {
+        for group in self.groups.iter() {
+            match group {
+                Group::Automata { regex, first } => {
+                    let input = Input::new(text).range(pos..).anchored(Anchored::Yes);
+                    if let Some(m) = regex.search(&input) {
+                        return Some((m.end(), first + m.pattern().as_usize()));
+                    }
+                }
+                Group::Single { engine, index } => {
+                    if let Some(end) = engine.match_at(text, pos) {
+                        return Some((end, *index));
+                    }
+                }
+            }
+        }
+        None
+    }
+}
+
 #[derive(Debug)]
 struct Inner {
     pattern: String,
@@ -1295,6 +1369,43 @@ mod tests {
 
     fn w(p: &str) -> (u128, u128) {
         width(p, Flags::default()).unwrap()
+    }
+
+    fn alternatives(patterns: &[&str], full: bool) -> Alternatives {
+        let regexes: Vec<Regex> = patterns.iter().map(|p| Regex::new(p, Flags::default()).unwrap()).collect();
+        Alternatives::new(&regexes, full).unwrap()
+    }
+
+    #[test]
+    fn alternatives_match_as_their_regexes_tried_in_order() {
+        // The first that matches wins, even where a later one matches longer, as Python's `re` takes the first
+        // alternative; one that needs backtracking keeps its place among them.
+        let set = alternatives(&["a", "ab", r"(?<=x)b", "b+", r"(\w)\1"], false);
+        assert_eq!(set.match_at("ab", 0), Some((1, 0)));
+        assert_eq!(set.match_at("xbb", 1), Some((2, 2)));
+        assert_eq!(set.match_at("bbb", 0), Some((3, 3)));
+        assert_eq!(set.match_at("cc", 0), Some((2, 4)));
+        assert_eq!(set.match_at("cd", 0), None);
+        // Each regex matched one by one gives the same.
+        let regexes: Vec<Regex> = ["a", "ab", r"(?<=x)b", "b+", r"(\w)\1"]
+            .iter()
+            .map(|p| Regex::new(p, Flags::default()).unwrap())
+            .collect();
+        for (text, pos) in [("ab", 0), ("xbb", 1), ("bbb", 0), ("cc", 0), ("cd", 0)] {
+            let one_by_one = regexes
+                .iter()
+                .enumerate()
+                .find_map(|(i, r)| r.match_at(text, pos).map(|end| (end, i)));
+            assert_eq!(set.match_at(text, pos), one_by_one, "{text} at {pos}");
+        }
+    }
+
+    #[test]
+    fn full_alternatives_match_a_whole_text() {
+        let set = alternatives(&["if", "[a-z]+"], true);
+        assert_eq!(set.match_at("if", 0), Some((2, 0)));
+        assert_eq!(set.match_at("iffy", 0), Some((4, 1)));
+        assert_eq!(set.match_at("if1", 0), None);
     }
 
     #[test]
